@@ -26,7 +26,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.File;
-import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,10 +34,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private GoogleMap mMap;
     private ListView listView;
-
-    String[] cars = {"Stojadin", "Fico", "Panzer"};
-
-    ArrayAdapter<String> adapter;
+    private ArrayAdapter<String> adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,8 +81,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         listView.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?>adapter, View v, int position, long id) {
-//              ItemClicked item = adapter.getItemAtPosition(position);
-                Toast.makeText(MapsActivity.this, "proba", Toast.LENGTH_SHORT).show();
+                drawRoute(position);
+                //Toast.makeText(MapsActivity.this, "proba", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -145,11 +141,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-//        LatLng sydney = new LatLng(-34, 151);
-//        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-
         TypedArray tArray = getResources().obtainTypedArray(R.array.route1);
         TypedArray tmp = null;
 
@@ -163,13 +154,57 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 double latitude = tmp.getFloat(1, -1);
                 double length = tmp.getFloat(2, -1);
 
+                LatLng point = new LatLng(latitude, length);
+
                 mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(latitude, length))
+                        .position(point)
                         .title(name));
+
+                if(i == 0) {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(point));
+                }
+
                 tmp.recycle();
             }
         }
 
         tArray.recycle();
+    }
+
+    public void drawRoute(int positionClicked) {
+        mMap.clear();
+
+        TypedArray allRoutes = getResources().obtainTypedArray(R.array.allRoutes);
+
+        int id = allRoutes.getResourceId(positionClicked, 0);
+        TypedArray route = getResources().obtainTypedArray(id);
+        allRoutes.recycle();
+
+        TypedArray landmark = null;
+
+        for (int i = 0; i < route.length(); i++) {
+            int landmarkID = route.getResourceId(i, 0);
+
+            if (landmarkID > 0) {
+                landmark = getResources().obtainTypedArray(landmarkID);
+
+                String name = landmark.getString(0);
+                double latitude = landmark.getFloat(1, -1);
+                double length = landmark.getFloat(2, -1);
+
+                LatLng point = new LatLng(latitude, length);
+
+                mMap.addMarker(new MarkerOptions()
+                        .position(point)
+                        .title(name));
+
+                if(i == 0) {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(point));
+                }
+
+                landmark.recycle();
+            }
+        }
+        route.recycle();
     }
 }
