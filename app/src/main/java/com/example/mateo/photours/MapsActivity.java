@@ -2,6 +2,7 @@ package com.example.mateo.photours;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.res.TypedArray;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -13,6 +14,9 @@ import android.support.v4.content.FileProvider;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -22,6 +26,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.File;
+import java.lang.reflect.Array;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -41,15 +49,44 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        listView = (ListView)findViewById(R.id.list);
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, cars);
-        listView.setAdapter(adapter);
+        fillRouteList();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startCamera();
+            }
+        });
+    }
+
+    public void fillRouteList() {
+        TypedArray allRoutes = getResources().obtainTypedArray(R.array.allRoutes);
+        TypedArray route = null;
+
+        List<String> routeNames = new ArrayList<>();
+
+        for (int i = 0; i < allRoutes.length(); i++) {
+            int id = allRoutes.getResourceId(i, 0);
+
+            if (id > 0) {
+                route = getResources().obtainTypedArray(id);
+                routeNames.add(route.getString(0));
+                route.recycle();
+            }
+        }
+
+        allRoutes.recycle();
+
+        listView = (ListView)findViewById(R.id.list);
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, routeNames.toArray(new String[routeNames.size()]));
+        listView.setAdapter(adapter);
+
+        listView.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?>adapter, View v, int position, long id) {
+//              ItemClicked item = adapter.getItemAtPosition(position);
+                Toast.makeText(MapsActivity.this, "proba", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -109,8 +146,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
 
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+//        LatLng sydney = new LatLng(-34, 151);
+//        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+//        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+
+        TypedArray tArray = getResources().obtainTypedArray(R.array.route1);
+        TypedArray tmp = null;
+
+        for (int i = 0; i < tArray.length(); i++) {
+            int id = tArray.getResourceId(i, 0);
+
+            if (id > 0) {
+                tmp = getResources().obtainTypedArray(id);
+
+                String name = tmp.getString(0);
+                double latitude = tmp.getFloat(1, -1);
+                double length = tmp.getFloat(2, -1);
+
+                mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(latitude, length))
+                        .title(name));
+                tmp.recycle();
+            }
+        }
+
+        tArray.recycle();
     }
 }

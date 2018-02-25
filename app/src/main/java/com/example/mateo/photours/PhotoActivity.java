@@ -35,7 +35,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class PhotoActivity extends AppCompatActivity {
 
@@ -54,7 +53,7 @@ public class PhotoActivity extends AppCompatActivity {
         imageView = (ImageView)findViewById(R.id.imageView);
         textView = (TextView)findViewById(R.id.textView);
 
-        textView.setText(R.string.Detecting___);
+        textView.setText(R.string.detecting);
 
         if (photoUri != null) {
             try {
