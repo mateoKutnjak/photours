@@ -175,7 +175,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         .position(point)
                         .title(name));
 
-                if(i == Global.ZERO) {
+                if(i == Global.ONE) {
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(point));
                 }
 
