@@ -1,5 +1,8 @@
 package com.example.mateo.photours;
 
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,6 +14,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -64,7 +68,8 @@ public class PhotoActivity extends AppCompatActivity {
                                 1200);
 
                 callCloudVision(bitmap);
-                imageView.setImageBitmap(bitmap);
+                imageView.setImageBitmap(setImage(getCameraFile().getPath(), 1200, 1200));
+//                imageView.setImageBitmap(MediaStore.Images.Media.getBitmap(getContentResolver(), photoUri));
 
             } catch (IOException e) {
                 Log.d(TAG, "Image picking failed because " + e.getMessage());
@@ -74,6 +79,77 @@ public class PhotoActivity extends AppCompatActivity {
             Log.d(TAG, "Image picker gave us a null image.");
             Toast.makeText(this, "Error", Toast.LENGTH_LONG).show();
         }
+    }
+
+    public Bitmap setImage(String path, final int targetWidth, final int targetHeight) {
+        Bitmap bitmap = null;
+        int orientation_val = 0;
+// Get exif orientation
+        try {
+            ExifInterface exif = new ExifInterface(path);
+            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
+            if (orientation == 6) {
+                orientation_val = 90;
+            }
+            else if (orientation == 3) {
+                orientation_val = 180;
+            }
+            else if (orientation == 8) {
+                orientation_val = 270;
+            }
+        }
+        catch (Exception e) {
+        }
+
+        try {
+// First decode with inJustDecodeBounds=true to check dimensions
+            final BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(path, options);
+
+// Adjust extents
+            int sourceWidth, sourceHeight;
+            if (orientation_val == 90 || orientation_val == 270) {
+                sourceWidth = options.outHeight;
+                sourceHeight = options.outWidth;
+            } else {
+                sourceWidth = options.outWidth;
+                sourceHeight = options.outHeight;
+            }
+
+// Calculate the maximum required scaling ratio if required and load the bitmap
+            if (sourceWidth > targetWidth || sourceHeight > targetHeight) {
+                float widthRatio = (float)sourceWidth / (float)targetWidth;
+                float heightRatio = (float)sourceHeight / (float)targetHeight;
+                float maxRatio = Math.max(widthRatio, heightRatio);
+                options.inJustDecodeBounds = false;
+                options.inSampleSize = (int)maxRatio;
+                bitmap = BitmapFactory.decodeFile(path, options);
+            } else {
+                bitmap = BitmapFactory.decodeFile(path);
+            }
+
+// Rotate the bitmap if required
+            if (orientation_val > 0) {
+                Matrix matrix = new Matrix();
+                matrix.postRotate(orientation_val);
+                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+            }
+
+// Re-scale the bitmap if necessary
+            sourceWidth = bitmap.getWidth();
+            sourceHeight = bitmap.getHeight();
+            if (sourceWidth != targetWidth || sourceHeight != targetHeight) {
+                float widthRatio = (float)sourceWidth / (float)targetWidth;
+                float heightRatio = (float)sourceHeight / (float)targetHeight;
+                float maxRatio = Math.max(widthRatio, heightRatio);
+                sourceWidth = (int)((float)sourceWidth / maxRatio);
+                sourceHeight = (int)((float)sourceHeight / maxRatio);
+                bitmap = Bitmap.createScaledBitmap(bitmap, sourceWidth,     sourceHeight, true);
+            }
+        } catch (Exception e) {
+        }
+        return bitmap;
     }
 
     private void callCloudVision(final Bitmap bitmap) throws IOException {
