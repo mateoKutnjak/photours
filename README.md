@@ -1,13 +1,9 @@
 # README #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+### Version control for phoTours mobile App. ### 
 
-### What is this repository for? ###
-
-Version control for phoTours mobile App. 
-
-* Quick summary
-* Version
+* phoTours is mobile App for photographing and recognizing monuments whilst providing valuable insights. 
+* version 0.1 
 * [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
 
 ### How do I get set up? ###
