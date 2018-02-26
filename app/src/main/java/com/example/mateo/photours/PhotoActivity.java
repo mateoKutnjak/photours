@@ -40,6 +40,7 @@ public class PhotoActivity extends AppCompatActivity {
 
     private static final String TAG = PhotoActivity.class.getSimpleName();
 
+    private Uri photoUri;
     private TextView textView;
     private ImageView imageView;
 
@@ -48,8 +49,7 @@ public class PhotoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo);
 
-        Uri photoUri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", getCameraFile());
-
+        photoUri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", getCameraFile());
         imageView = (ImageView)findViewById(R.id.imageView);
         textView = (TextView)findViewById(R.id.textView);
 
@@ -74,6 +74,10 @@ public class PhotoActivity extends AppCompatActivity {
             Log.d(TAG, "Image picker gave us a null image.");
             Toast.makeText(this, "Error", Toast.LENGTH_LONG).show();
         }
+    }
+
+    private void fillScreen() {
+
     }
 
     private void callCloudVision(final Bitmap bitmap) throws IOException {

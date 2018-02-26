@@ -16,7 +16,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -26,7 +25,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.File;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,13 +38,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+
+        addMapFragment();
+        fillRouteList();
+        addFloatingActionButton();
+    }
+
+    private void addMapFragment() {
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+    }
 
-        fillRouteList();
-
+    private void addFloatingActionButton() {
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -56,25 +60,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
-    public void fillRouteList() {
+    private void fillRouteList() {
+        listView = (ListView)findViewById(R.id.list);
+
         TypedArray allRoutes = getResources().obtainTypedArray(R.array.allRoutes);
         TypedArray route = null;
 
         List<String> routeNames = new ArrayList<>();
 
         for (int i = 0; i < allRoutes.length(); i++) {
-            int id = allRoutes.getResourceId(i, 0);
+            int id = allRoutes.getResourceId(i, Global.ZERO);
 
             if (id > 0) {
                 route = getResources().obtainTypedArray(id);
-                routeNames.add(route.getString(0));
+                routeNames.add(route.getString(Global.ROUTE_NAME_INDEX));
                 route.recycle();
             }
         }
-
         allRoutes.recycle();
 
-        listView = (ListView)findViewById(R.id.list);
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, routeNames.toArray(new String[routeNames.size()]));
         listView.setAdapter(adapter);
 
@@ -82,7 +86,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onItemClick(AdapterView<?>adapter, View v, int position, long id) {
                 drawRoute(position);
-                //Toast.makeText(MapsActivity.this, "proba", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -137,38 +140,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        TypedArray tArray = getResources().obtainTypedArray(R.array.route1);
-        TypedArray tmp = null;
-
-        for (int i = 0; i < tArray.length(); i++) {
-            int id = tArray.getResourceId(i, 0);
-
-            if (id > 0) {
-                tmp = getResources().obtainTypedArray(id);
-
-                String name = tmp.getString(0);
-                double latitude = tmp.getFloat(1, -1);
-                double length = tmp.getFloat(2, -1);
-
-                LatLng point = new LatLng(latitude, length);
-
-                mMap.addMarker(new MarkerOptions()
-                        .position(point)
-                        .title(name));
-
-                if(i == 0) {
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(point));
-                }
-
-                tmp.recycle();
-            }
-        }
-
-        tArray.recycle();
+        drawRoute(Global.ZERO);
     }
 
     public void drawRoute(int positionClicked) {
@@ -176,29 +153,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         TypedArray allRoutes = getResources().obtainTypedArray(R.array.allRoutes);
 
-        int id = allRoutes.getResourceId(positionClicked, 0);
+        int id = allRoutes.getResourceId(positionClicked, Global.ZERO);
         TypedArray route = getResources().obtainTypedArray(id);
         allRoutes.recycle();
 
         TypedArray landmark = null;
 
         for (int i = 0; i < route.length(); i++) {
-            int landmarkID = route.getResourceId(i, 0);
+            int landmarkID = route.getResourceId(i, Global.ZERO);
 
             if (landmarkID > 0) {
                 landmark = getResources().obtainTypedArray(landmarkID);
 
-                String name = landmark.getString(0);
-                double latitude = landmark.getFloat(1, -1);
-                double length = landmark.getFloat(2, -1);
+                String name = landmark.getString(Global.LANDMARK_NAME_INDEX);
+                double latitude = landmark.getFloat(Global.LANDMARK_LATITUDE_INDEX, Global.ZERO);
+                double longitude = landmark.getFloat(Global.LANDMARK_LONGITUDE_INDEX, Global.ZERO);
 
-                LatLng point = new LatLng(latitude, length);
+                LatLng point = new LatLng(latitude, longitude);
 
                 mMap.addMarker(new MarkerOptions()
                         .position(point)
                         .title(name));
 
-                if(i == 0) {
+                if(i == Global.ZERO) {
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(point));
                 }
 
