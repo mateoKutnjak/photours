@@ -76,10 +76,6 @@ public class PhotoActivity extends AppCompatActivity {
         }
     }
 
-    private void fillScreen() {
-
-    }
-
     private void callCloudVision(final Bitmap bitmap) throws IOException {
 
         // Do the real work in an async task, because we need to use the network anyway
