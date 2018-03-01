@@ -1,59 +1,119 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<android.support.design.widget.CoordinatorLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:id="@+id/gallerylayout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
 
-    <LinearLayout
+    <fragment xmlns:map="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        map:cameraBearing="0"
+        map:cameraTargetLat="45.813174"
+        map:cameraTargetLng="15.977312"
+        map:cameraTilt="0"
+        map:cameraZoom="14" />
+
+    <android.support.design.widget.CoordinatorLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <LinearLayout
-            android:id="@+id/viewA"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="0.3"
-            android:orientation="horizontal" >
+            android:orientation="vertical"
+            android:weightSum="3">
 
-            <fragment
-                xmlns:map="http://schemas.android.com/apk/res-auto"
-                android:id="@+id/map"
-                android:name="com.google.android.gms.maps.SupportMapFragment"
+            <TextView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                map:cameraBearing="0"
-                map:cameraTargetLat="45.813174"
-                map:cameraTargetLng="15.977312"
-                map:cameraTilt="0"
-                map:cameraZoom="14"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/viewB"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="0.5"
-            android:orientation="horizontal">
+                android:layout_height="0dp"
+                android:layout_weight="2"/>
 
             <ListView
                 android:id="@+id/list"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_margin="50dp"
+                android:background="@drawable/back"
+                android:scaleType="fitXY"
+                android:layout_width="fill_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
             </ListView>
+
         </LinearLayout>
-    </LinearLayout>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:src="@android:drawable/ic_menu_camera"
-        app:backgroundTint="@color/colorPrimary"
-        app:layout_anchor="@id/viewA"
-        app:layout_anchorGravity="bottom|right|end"/>
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:background="@drawable/fab"
+            android:src="@android:drawable/ic_menu_camera"
+            app:backgroundTint="@color/colorSilver"
+            app:layout_anchor="@id/list"
+            app:layout_anchorGravity="top|right|end"/>
 
-</android.support.design.widget.CoordinatorLayout>
+    </android.support.design.widget.CoordinatorLayout>
+
+</RelativeLayout>
+
+<!--<?xml version="1.0" encoding="utf-8"?>-->
+
+<!--<android.support.design.widget.CoordinatorLayout-->
+    <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--xmlns:app="http://schemas.android.com/apk/res-auto"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent">-->
+
+    <!--<LinearLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:orientation="vertical">-->
+
+        <!--<LinearLayout-->
+            <!--android:id="@+id/viewA"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:layout_weight="0.3"-->
+            <!--android:orientation="horizontal" >-->
+
+            <!--<fragment-->
+                <!--xmlns:map="http://schemas.android.com/apk/res-auto"-->
+                <!--android:id="@+id/map"-->
+                <!--android:name="com.google.android.gms.maps.SupportMapFragment"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="match_parent"-->
+                <!--map:cameraBearing="0"-->
+                <!--map:cameraTargetLat="45.813174"-->
+                <!--map:cameraTargetLng="15.977312"-->
+                <!--map:cameraTilt="0"-->
+                <!--map:cameraZoom="14"/>-->
+        <!--</LinearLayout>-->
+
+        <!--<LinearLayout-->
+            <!--android:id="@+id/viewB"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:layout_weight="0.5"-->
+            <!--android:orientation="horizontal">-->
+
+            <!--<ListView-->
+                <!--android:id="@+id/list"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content">-->
+            <!--</ListView>-->
+        <!--</LinearLayout>-->
+    <!--</LinearLayout>-->
+
+    <!--<android.support.design.widget.FloatingActionButton-->
+        <!--android:id="@+id/fab"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_margin="16dp"-->
+        <!--android:src="@android:drawable/ic_menu_camera"-->
+        <!--app:backgroundTint="@color/colorPrimary"-->
+        <!--app:layout_anchor="@id/viewA"-->
+        <!--app:layout_anchorGravity="bottom|right|end"/>-->
+
+<!--</android.support.design.widget.CoordinatorLayout>-->
