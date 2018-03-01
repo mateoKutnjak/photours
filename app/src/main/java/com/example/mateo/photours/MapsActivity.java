@@ -19,10 +19,15 @@ import android.widget.ListView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView;
 
+import com.akexorcist.googledirection.DirectionCallback;
+import com.akexorcist.googledirection.GoogleDirection;
+import com.akexorcist.googledirection.constant.TransportMode;
+import com.akexorcist.googledirection.model.Direction;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -153,7 +158,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // in a raw resource file.
             boolean success = mMap.setMapStyle(
                     MapStyleOptions.loadRawResourceStyle(
-                            this, R.raw.map_style_aubergine_labels));
+                            this, R.raw.map_style_retro_labels));
 
             if (!success) {
                 Log.e("MapsActivityRaw", "Style parsing failed.");
@@ -176,6 +181,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         TypedArray landmark = null;
 
+//        int originID = route.getResourceId(Global.ZERO, Integer.MAX_VALUE);
+//        int destinationID = route.getResourceId(route.length()-1, Integer.MAX_VALUE);
+//
+//        TypedArray originTA = route.getResources().obtainTypedArray(originID);
+//        TypedArray destinationTA = route.getResources().obtainTypedArray(destinationID);
+//
+//        LatLng origin = new LatLng(originTA.getFloat(1, 0), originTA.getFloat(2, 0));
+//        LatLng destination = new LatLng(destinationTA.getFloat(1, 0), destinationTA.getFloat(2, 0));
+//        GoogleDirection.withServerKey(getResources().getString(R.string.google_maps_key))
+//                .from(origin)
+//                .to(destination)
+//                .transportMode(TransportMode.WALKING)
+//                .execute(new DirectionCallback() {
+//                    @Override
+//                    public void onDirectionSuccess(Direction direction, String rawBody) {
+//                        // Do something here
+//                    }
+//
+//                    @Override
+//                    public void onDirectionFailure(Throwable t) {
+//                        // Do something here
+//                    }
+//                });
+
         for (int i = 0; i < route.length(); i++) {
             int landmarkID = route.getResourceId(i, Global.ZERO);
 
@@ -190,7 +219,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 mMap.addMarker(new MarkerOptions()
                         .position(point)
-                        .title(name));
+                        .title(name)
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
 
                 if(i == Global.ONE) {
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(point));
