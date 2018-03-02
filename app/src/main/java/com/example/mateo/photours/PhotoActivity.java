@@ -207,7 +207,7 @@ public class PhotoActivity extends AppCompatActivity {
                         // add the features we want
                         annotateImageRequest.setFeatures(new ArrayList<Feature>() {{
                             Feature feature = new Feature();
-                            feature.setType("LABEL_DETECTION");
+                            feature.setType("LANDMARK_DETECTION");
                             feature.setMaxResults(10);
                             add(feature);
                         }});
@@ -243,9 +243,11 @@ public class PhotoActivity extends AppCompatActivity {
     private String convertResponseToString(BatchAnnotateImagesResponse response) {
         String message = "";
 
-        List<EntityAnnotation> labels = response.getResponses().get(0).getLabelAnnotations();
+        List<EntityAnnotation> labels = response.getResponses().get(0).getLandmarkAnnotations();
         if (labels != null) {
-            message = String.format("%s", labels.get(0).getDescription());
+            for(int i = 0; i < 5; i ++) {
+                message += String.format("%s\n", labels.get(i).getDescription());
+            }
         } else {
             message += "Not recognized";
         }
