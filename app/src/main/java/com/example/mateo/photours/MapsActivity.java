@@ -2,15 +2,20 @@ package com.example.mateo.photours;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.view.View;
@@ -18,11 +23,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView;
+import android.widget.Toast;
 
-import com.akexorcist.googledirection.DirectionCallback;
-import com.akexorcist.googledirection.GoogleDirection;
-import com.akexorcist.googledirection.constant.TransportMode;
-import com.akexorcist.googledirection.model.Direction;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -46,6 +48,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Global.REQUEST_LOCATION);
 
         addMapFragment();
         fillRouteList();
@@ -153,6 +157,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+        } else {
+            Toast.makeText(MapsActivity.this, "You have to accept to enjoy all app's services!", Toast.LENGTH_LONG).show();
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+                mMap.setMyLocationEnabled(true);
+            }
+        }
+
+        if (mMap != null) {
+            mMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
+
+                @Override
+                public void onMyLocationChange(Location arg0) {
+                    // TODO Auto-generated method stub
+
+//                    CameraUpdate center= CameraUpdateFactory.newLatLng(new LatLng(arg0.getLatitude(), arg0.getLongitude()));
+//                    CameraUpdate zoom=CameraUpdateFactory.zoomTo(12);
+
+//                    mMap.moveCamera(center);
+//                    mMap.animateCamera(zoom);
+                }
+            });
+
+        }
+
         try {
             // Customise the styling of the base map using a JSON object defined
             // in a raw resource file.
@@ -172,6 +204,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void drawRoute(int positionClicked) {
         mMap.clear();
+        //mMap.setMyLocationEnabled(true);
 
         TypedArray allRoutes = getResources().obtainTypedArray(R.array.allRoutes);
 

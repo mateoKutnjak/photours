@@ -27,4 +27,6 @@ public class Global extends Application {
     public static final int LANDMARK_LONGITUDE_INDEX = 2;
 
     public static final int ROUTE_NAME_INDEX = 0;
+
+    public static final int REQUEST_LOCATION = 1;
 }
