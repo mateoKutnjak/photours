@@ -37,6 +37,7 @@ import com.example.mateo.photours.database.DatabaseInitializer;
 import com.example.mateo.photours.database.entities.Landmark;
 import com.example.mateo.photours.database.entities.LandmarkRoute;
 import com.example.mateo.photours.database.entities.Route;
+import com.example.mateo.photours.util.Coordinate2String;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -194,63 +195,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void drawRoute(String routeName) {
         mMap.clear();
 
-//        String url = "https://maps.googleapis.com/maps/api/directions/json";
-//
-//        Uri.Builder builder = new Uri.Builder();
-//        builder.scheme("https")
-//                .authority("maps.googleapis.com")
-//                .appendPath("maps")
-//                .appendPath("api")
-//                .appendPath("directions")
-//                .appendPath("json")
-//                .appendQueryParameter("origin", "Toronto")
-//                .appendQueryParameter("destination", "Montreal")
-//                .appendQueryParameter("key", Global.SERVER_KEY)
-//                .appendQueryParameter("sensor", "true");
-//
-//        Log.d("a", "Request: " + builder.build().toString());
-//
-//
-//        JsonObjectRequest jsObjRequest = new JsonObjectRequest
-//                (Request.Method.GET, builder.build().toString(), null, new Response.Listener<JSONObject>() {
-//
-//                    @Override
-//                    public void onResponse(JSONObject response) {
-//                        ParserTask parserTask = new ParserTask();
-//                        parserTask.execute(response.toString());
-//                    }
-//                }, new Response.ErrorListener() {
-//
-//                    @Override
-//                    public void onErrorResponse(VolleyError error) {
-//                        Log.d("a", "Error: " + error
-//                                + "\nStatus Code " + error.networkResponse.statusCode
-//                                + "\nResponse Data " + error.networkResponse.data
-//                                + "\nCause " + error.getCause()
-//                                + "\nmessage" + error.getMessage());
-//                    }
-//                }) {
-//            @Override
-//            public Map<String, String> getHeaders() throws AuthFailureError {
-//                HashMap<String, String> headers = new HashMap<String,String>();
-//                //headers.put("Content-Type", "application/json; charset=utf-8");
-//                return headers;
-//            }
-//            @Override
-//            public String getBodyContentType() {
-//                return "application/json";
-//            }
-//        };
-//
-//        RequestQueue queue = Volley.newRequestQueue(this);
-//        queue.add(jsObjRequest);
-
-        // ====================================
-
-
         Route route = db.routeDao().findByName(routeName);
-        List<LandmarkRoute> landmarkRoutes = db.landmarkRouteDao().getAll();
         List<Landmark> landmarks = db.landmarkRouteDao().findLandmarksForRouteId(route.uid);
+
+        downloadDirections(landmarks);
 
         for(Landmark landmark : landmarks) {
             LatLng point = new LatLng(landmark.latitude, landmark.longitude);
@@ -265,6 +213,65 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //                new LatLng(
 //                        landmarks.get(0).latitude,
 //                        landmarks.get(0).longitude)));
+    }
+
+    private void downloadDirections(List<Landmark> landmarks) {
+        if(landmarks.size() < 2) {
+            throw new IllegalArgumentException();
+        }
+
+        Coordinate2String c2s = new Coordinate2String(landmarks);
+
+        Uri.Builder builder = new Uri.Builder();
+        builder.scheme("https")
+                .authority("maps.googleapis.com")
+                .appendPath("maps")
+                .appendPath("api")
+                .appendPath("directions")
+                .appendPath("json")
+                .appendQueryParameter("origin", c2s.getOriginParam())
+                .appendQueryParameter("destination", c2s.getDestParam())
+                .appendQueryParameter("mode", Global.TRAVEL_MODE_WALKING)
+                .appendQueryParameter("waypoints", c2s.getWaypointsParam())
+                .appendQueryParameter("key", Global.SERVER_KEY)
+                .appendQueryParameter("sensor", "true");
+
+        Log.d("a", "Request: " + builder.build().toString());
+
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest
+                (Request.Method.GET, builder.build().toString(), null, new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d("a", response.toString());
+                        ParserTask parserTask = new ParserTask();
+                        parserTask.execute(response.toString());
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("a", "Error: " + error
+                                + "\nStatus Code " + error.networkResponse.statusCode
+                                + "\nResponse Data " + error.networkResponse.data
+                                + "\nCause " + error.getCause()
+                                + "\nmessage" + error.getMessage());
+                    }
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> headers = new HashMap<String,String>();
+                //headers.put("Content-Type", "application/json; charset=utf-8");
+                return headers;
+            }
+            @Override
+            public String getBodyContentType() {
+                return "application/json";
+            }
+        };
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        queue.add(jsObjRequest);
     }
 
     private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String,String>>>> {
