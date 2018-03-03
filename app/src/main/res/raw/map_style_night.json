@@ -1,729 +1,238 @@
-{
-  "geocoded_waypoints": [
-    {
-      "geocoder_status": "OK",
-      "place_id": "ChIJa8_KBf7WZUcRZzj0s44vFgI",
-      "types": [
-        "street_address"
-      ]
-    },
-    {
-      "geocoder_status": "OK",
-      "place_id": "ChIJ9Q0CNvvWZUcRLiqAnjUxPFU",
-      "types": [
-        "premise"
-      ]
-    },
-    {
-      "geocoder_status": "OK",
-      "place_id": "ChIJZz7CUP3WZUcRyulgT2yhsUI",
-      "types": [
-        "premise"
-      ]
-    },
-    {
-      "geocoder_status": "OK",
-      "place_id": "ChIJq5ea6f3WZUcRju8a3JGzdwI",
-      "types": [
-        "street_address"
-      ]
-    }
-  ],
-  "routes": [
-    {
-      "bounds": {
-        "northeast": {
-          "lat": 45.814561,
-          "lng": 15.9797972
-        },
-        "southwest": {
-          "lat": 45.80939960000001,
-          "lng": 15.9696245
-        }
-      },
-      "copyrights": "Map data ©2018 Google",
-      "legs": [
-        {
-          "distance": {
-            "text": "1.2 km",
-            "value": 1229
-          },
-          "duration": {
-            "text": "15 mins",
-            "value": 876
-          },
-          "end_address": "Trg Republike Hrvatske 15, 10000, Zagreb, Croatia",
-          "end_location": {
-            "lat": 45.80939960000001,
-            "lng": 15.9696425
-          },
-          "start_address": "Vlaška ul. 5, 10000, Zagreb, Croatia",
-          "start_location": {
-            "lat": 45.8142412,
-            "lng": 15.9797972
-          },
-          "steps": [
-            {
-              "distance": {
-                "text": "86 m",
-                "value": 86
-              },
-              "duration": {
-                "text": "1 min",
-                "value": 61
-              },
-              "end_location": {
-                "lat": 45.8144955,
-                "lng": 15.9787744
-              },
-              "html_instructions": "Head <b>west<\/b> toward <b>Ul. Tome Bakača<\/b>",
-              "polyline": {
-                "points": "_bsvGw`p`BS|AAJCDGDQtA?@"
-              },
-              "start_location": {
-                "lat": 45.8142412,
-                "lng": 15.9797972
-              },
-              "travel_mode": "WALKING"
-            },
-            {
-              "distance": {
-                "text": "22 m",
-                "value": 22
-              },
-              "duration": {
-                "text": "1 min",
-                "value": 14
-              },
-              "end_location": {
-                "lat": 45.8143769,
-                "lng": 15.9785602
-              },
-              "html_instructions": "Turn <b>left<\/b> onto <b>Ul. Tome Bakača<\/b>",
-              "maneuver": "turn-left",
-              "polyline": {
-                "points": "scsvGizo`B@FDJBFDFDD"
-              },
-              "start_location": {
-                "lat": 45.8144955,
-                "lng": 15.9787744
-              },
-              "travel_mode": "WALKING"
-            },
-            {
-              "distance": {
-                "text": "0.1 km",
-                "value": 140
-              },
-              "duration": {
-                "text": "2 mins",
-                "value": 95
-              },
-              "end_location": {
-                "lat": 45.8131269,
-                "lng": 15.9784086
-              },
-              "html_instructions": "Turn <b>left<\/b> to stay on <b>Ul. Tome Bakača<\/b>",
-              "maneuver": "turn-left",
-              "polyline": {
-                "points": "{bsvG_yo`BJ?dAGjATZDXBd@D"
-              },
-              "start_location": {
-                "lat": 45.8143769,
-                "lng": 15.9785602
-              },
-              "travel_mode": "WALKING"
-            },
-            {
-              "distance": {
-                "text": "55 m",
-                "value": 55
-              },
-              "duration": {
-                "text": "1 min",
-                "value": 41
-              },
-              "end_location": {
-                "lat": 45.8126436,
-                "lng": 15.9782377
-              },
-              "html_instructions": "Continue straight onto <b>Trg bana Josipa Jelačića<\/b>",
-              "maneuver": "straight",
-              "polyline": {
-                "points": "a{rvGaxo`Bd@Lz@R"
-              },
-              "start_location": {
-                "lat": 45.8131269,
-                "lng": 15.9784086
-              },
-              "travel_mode": "WALKING"
-            },
-            {
-              "distance": {
-                "text": "52 m",
-                "value": 52
-              },
-              "duration": {
-                "text": "1 min",
-                "value": 36
-              },
-              "end_location": {
-                "lat": 45.812796,
-                "lng": 15.9776009
-              },
-              "html_instructions": "Turn <b>right<\/b> to stay on <b>Trg bana Josipa Jelačića<\/b>",
-              "maneuver": "turn-right",
-              "polyline": {
-                "points": "_xrvG_wo`B_@~B"
-              },
-              "start_location": {
-                "lat": 45.8126436,
-                "lng": 15.9782377
-              },
-              "travel_mode": "WALKING"
-            },
-            {
-              "distance": {
-                "text": "0.2 km",
-                "value": 154
-              },
-              "duration": {
-                "text": "2 mins",
-                "value": 102
-              },
-              "end_location": {
-                "lat": 45.8114183,
-                "lng": 15.9774434
-              },
-              "html_instructions": "Turn <b>left<\/b> onto <b>Praška ul.<\/b>",
-              "maneuver": "turn-left",
-              "polyline": {
-                "points": "_yrvG_so`B^AbBNnCP"
-              },
-              "start_location": {
-                "lat": 45.812796,
-                "lng": 15.9776009
-              },
-              "travel_mode": "WALKING"
-            },
-            {
-              "distance": {
-                "text": "0.2 km",
-                "value": 246
-              },
-              "duration": {
-                "text": "3 mins",
-                "value": 175
-              },
-              "end_location": {
-                "lat": 45.8112465,
-                "lng": 15.974275
-              },
-              "html_instructions": "Turn <b>right<\/b> onto <b>Teslina ul.<\/b>\/<b>Ul. Nikole Tesle<\/b>",
-              "maneuver": "turn-right",
-              "polyline": {
-                "points": "kprvG_ro`BFnEVbK@d@"
-              },
-              "start_location": {
-                "lat": 45.8114183,
-                "lng": 15.9774434
-              },
-              "travel_mode": "WALKING"
-            },
-            {
-              "distance": {
-                "text": "0.3 km",
-                "value": 319
-              },
-              "duration": {
-                "text": "4 mins",
-                "value": 233
-              },
-              "end_location": {
-                "lat": 45.8101828,
-                "lng": 15.9704989
-              },
-              "html_instructions": "Continue onto <b>Masarykova ul.<\/b>",
-              "polyline": {
-                "points": "iorvGe~n`Bv@hDf@~BJ^Pz@R`@n@jDF`@Db@@VBd@?X"
-              },
-              "start_location": {
-                "lat": 45.8112465,
-                "lng": 15.974275
-              },
-              "travel_mode": "WALKING"
-            },
-            {
-              "distance": {
-                "text": "13 m",
-                "value": 13
-              },
-              "duration": {
-                "text": "1 min",
-                "value": 14
-              },
-              "end_location": {
-                "lat": 45.8101367,
-                "lng": 15.9706496
-              },
-              "html_instructions": "Sharp <b>left<\/b> onto <b>Trg Republike Hrvatske<\/b>",
-              "maneuver": "turn-sharp-left",
-              "polyline": {
-                "points": "shrvGsfn`BF]"
-              },
-              "start_location": {
-                "lat": 45.8101828,
-                "lng": 15.9704989
-              },
-              "travel_mode": "WALKING"
-            },
-            {
-              "distance": {
-                "text": "73 m",
-                "value": 73
-              },
-              "duration": {
-                "text": "1 min",
-                "value": 57
-              },
-              "end_location": {
-                "lat": 45.8098627,
-                "lng": 15.9698438
-              },
-              "html_instructions": "Sharp <b>right<\/b>",
-              "maneuver": "turn-sharp-right",
-              "polyline": {
-                "points": "khrvGqgn`Bv@dBCXB`@"
-              },
-              "start_location": {
-                "lat": 45.8101367,
-                "lng": 15.9706496
-              },
-              "travel_mode": "WALKING"
-            },
-            {
-              "distance": {
-                "text": "6 m",
-                "value": 6
-              },
-              "duration": {
-                "text": "1 min",
-                "value": 5
-              },
-              "end_location": {
-                "lat": 45.8098063,
-                "lng": 15.9698376
-              },
-              "html_instructions": "Turn <b>left<\/b>",
-              "maneuver": "turn-left",
-              "polyline": {
-                "points": "sfrvGobn`BH?"
-              },
-              "start_location": {
-                "lat": 45.8098627,
-                "lng": 15.9698438
-              },
-              "travel_mode": "WALKING"
-            },
-            {
-              "distance": {
-                "text": "17 m",
-                "value": 17
-              },
-              "duration": {
-                "text": "1 min",
-                "value": 10
-              },
-              "end_location": {
-                "lat": 45.8098129,
-                "lng": 15.9696245
-              },
-              "html_instructions": "Turn <b>right<\/b>",
-              "maneuver": "turn-right",
-              "polyline": {
-                "points": "ifrvGobn`B?j@"
-              },
-              "start_location": {
-                "lat": 45.8098063,
-                "lng": 15.9698376
-              },
-              "travel_mode": "WALKING"
-            },
-            {
-              "distance": {
-                "text": "46 m",
-                "value": 46
-              },
-              "duration": {
-                "text": "1 min",
-                "value": 33
-              },
-              "end_location": {
-                "lat": 45.80939960000001,
-                "lng": 15.9696425
-              },
-              "html_instructions": "Turn <b>left<\/b><div style=\"font-size:0.9em\">Destination will be on the left<\/div>",
-              "maneuver": "turn-left",
-              "polyline": {
-                "points": "ifrvGcan`BpAC"
-              },
-              "start_location": {
-                "lat": 45.8098129,
-                "lng": 15.9696245
-              },
-              "travel_mode": "WALKING"
-            }
-          ],
-          "traffic_speed_entry": [],
-          "via_waypoint": []
-        },
-        {
-          "distance": {
-            "text": "0.8 km",
-            "value": 843
-          },
-          "duration": {
-            "text": "12 mins",
-            "value": 701
-          },
-          "end_address": "Strossmayerovo šetalište 9, 10000, Zagreb, Croatia",
-          "end_location": {
-            "lat": 45.8145591,
-            "lng": 15.9732929
-          },
-          "start_address": "Trg Republike Hrvatske 15, 10000, Zagreb, Croatia",
-          "start_location": {
-            "lat": 45.80939960000001,
-            "lng": 15.9696425
-          },
-          "steps": [
-            {
-              "distance": {
-                "text": "46 m",
-                "value": 46
-              },
-              "duration": {
-                "text": "1 min",
-                "value": 33
-              },
-              "end_location": {
-                "lat": 45.8098129,
-                "lng": 15.9696245
-              },
-              "html_instructions": "Head <b>north<\/b>",
-              "polyline": {
-                "points": "wcrvGgan`BqAB"
-              },
-              "start_location": {
-                "lat": 45.80939960000001,
-                "lng": 15.9696425
-              },
-              "travel_mode": "WALKING"
-            },
-            {
-              "distance": {
-                "text": "17 m",
-                "value": 17
-              },
-              "duration": {
-                "text": "1 min",
-                "value": 15
-              },
-              "end_location": {
-                "lat": 45.8098063,
-                "lng": 15.9698376
-              },
-              "html_instructions": "Turn <b>right<\/b> toward <b>Trg Republike Hrvatske<\/b>",
-              "maneuver": "turn-right",
-              "polyline": {
-                "points": "ifrvGcan`B?k@"
-              },
-              "start_location": {
-                "lat": 45.8098129,
-                "lng": 15.9696245
-              },
-              "travel_mode": "WALKING"
-            },
-            {
-              "distance": {
-                "text": "6 m",
-                "value": 6
-              },
-              "duration": {
-                "text": "1 min",
-                "value": 4
-              },
-              "end_location": {
-                "lat": 45.8098627,
-                "lng": 15.9698438
-              },
-              "html_instructions": "Turn <b>left<\/b> toward <b>Trg Republike Hrvatske<\/b>",
-              "maneuver": "turn-left",
-              "polyline": {
-                "points": "ifrvGobn`BI?"
-              },
-              "start_location": {
-                "lat": 45.8098063,
-                "lng": 15.9698376
-              },
-              "travel_mode": "WALKING"
-            },
-            {
-              "distance": {
-                "text": "73 m",
-                "value": 73
-              },
-              "duration": {
-                "text": "1 min",
-                "value": 50
-              },
-              "end_location": {
-                "lat": 45.8101367,
-                "lng": 15.9706496
-              },
-              "html_instructions": "Turn <b>right<\/b> toward <b>Trg Republike Hrvatske<\/b>",
-              "maneuver": "turn-right",
-              "polyline": {
-                "points": "sfrvGobn`BCa@BYw@eB"
-              },
-              "start_location": {
-                "lat": 45.8098627,
-                "lng": 15.9698438
-              },
-              "travel_mode": "WALKING"
-            },
-            {
-              "distance": {
-                "text": "13 m",
-                "value": 13
-              },
-              "duration": {
-                "text": "1 min",
-                "value": 9
-              },
-              "end_location": {
-                "lat": 45.8101828,
-                "lng": 15.9704989
-              },
-              "html_instructions": "Turn <b>left<\/b> onto <b>Trg Republike Hrvatske<\/b>",
-              "maneuver": "turn-left",
-              "polyline": {
-                "points": "khrvGqgn`BG\\"
-              },
-              "start_location": {
-                "lat": 45.8101367,
-                "lng": 15.9706496
-              },
-              "travel_mode": "WALKING"
-            },
-            {
-              "distance": {
-                "text": "0.1 km",
-                "value": 135
-              },
-              "duration": {
-                "text": "2 mins",
-                "value": 106
-              },
-              "end_location": {
-                "lat": 45.8105191,
-                "lng": 15.9721537
-              },
-              "html_instructions": "Sharp <b>right<\/b> onto <b>Masarykova ul.<\/b>",
-              "maneuver": "turn-sharp-right",
-              "polyline": {
-                "points": "shrvGsfn`B?YCe@AWEc@Ga@o@kD"
-              },
-              "start_location": {
-                "lat": 45.8101828,
-                "lng": 15.9704989
-              },
-              "travel_mode": "WALKING"
-            },
-            {
-              "distance": {
-                "text": "0.3 km",
-                "value": 299
-              },
-              "duration": {
-                "text": "4 mins",
-                "value": 234
-              },
-              "end_location": {
-                "lat": 45.81321,
-                "lng": 15.9719972
-              },
-              "html_instructions": "Turn <b>left<\/b> onto <b>Gundulićeva ul.<\/b>",
-              "maneuver": "turn-left",
-              "polyline": {
-                "points": "wjrvG}pn`BoGLI@_GL"
-              },
-              "start_location": {
-                "lat": 45.8105191,
-                "lng": 15.9721537
-              },
-              "travel_mode": "WALKING"
-            },
-            {
-              "distance": {
-                "text": "86 m",
-                "value": 86
-              },
-              "duration": {
-                "text": "1 min",
-                "value": 63
-              },
-              "end_location": {
-                "lat": 45.8131785,
-                "lng": 15.9731089
-              },
-              "html_instructions": "Turn <b>right<\/b> onto <b>Ilica<\/b>",
-              "maneuver": "turn-right",
-              "polyline": {
-                "points": "q{rvG_pn`BD}E"
-              },
-              "start_location": {
-                "lat": 45.81321,
-                "lng": 15.9719972
-              },
-              "travel_mode": "WALKING"
-            },
-            {
-              "distance": {
-                "text": "0.2 km",
-                "value": 168
-              },
-              "duration": {
-                "text": "3 mins",
-                "value": 187
-              },
-              "end_location": {
-                "lat": 45.8145591,
-                "lng": 15.9732929
-              },
-              "html_instructions": "Turn <b>left<\/b> onto <b>Tomićeva ul.<\/b><div style=\"font-size:0.9em\">Take the stairs<\/div><div style=\"font-size:0.9em\">Destination will be on the left<\/div>",
-              "maneuver": "turn-left",
-              "polyline": {
-                "points": "k{rvG}vn`BcC?S?uABK?A?CAAA?A?S?CA??AC?K@?I"
-              },
-              "start_location": {
-                "lat": 45.8131785,
-                "lng": 15.9731089
-              },
-              "travel_mode": "WALKING"
-            }
-          ],
-          "traffic_speed_entry": [],
-          "via_waypoint": []
-        },
-        {
-          "distance": {
-            "text": "0.4 km",
-            "value": 411
-          },
-          "duration": {
-            "text": "6 mins",
-            "value": 365
-          },
-          "end_address": "Trg bana Josipa Jelačića 6, 10000, Zagreb, Croatia",
-          "end_location": {
-            "lat": 45.8133202,
-            "lng": 15.9773315
-          },
-          "start_address": "Strossmayerovo šetalište 9, 10000, Zagreb, Croatia",
-          "start_location": {
-            "lat": 45.8145591,
-            "lng": 15.9732929
-          },
-          "steps": [
-            {
-              "distance": {
-                "text": "0.2 km",
-                "value": 172
-              },
-              "duration": {
-                "text": "2 mins",
-                "value": 141
-              },
-              "end_location": {
-                "lat": 45.8141353,
-                "lng": 15.9747471
-              },
-              "html_instructions": "Head <b>southeast<\/b> on <b>Strossmayerovo šetalište<\/b> toward <b>Dverce ul.<\/b><div style=\"font-size:0.9em\">Take the stairs<\/div>",
-              "polyline": {
-                "points": "_dsvGaxn`BBMFMRc@FUJy@H_BDw@?G?g@?A@A@?@A@@BBBD@F?HAZ"
-              },
-              "start_location": {
-                "lat": 45.8145591,
-                "lng": 15.9732929
-              },
-              "travel_mode": "WALKING"
-            },
-            {
-              "distance": {
-                "text": "0.1 km",
-                "value": 147
-              },
-              "duration": {
-                "text": "3 mins",
-                "value": 162
-              },
-              "end_location": {
-                "lat": 45.813498,
-                "lng": 15.976176
-              },
-              "html_instructions": "Sharp <b>left<\/b> onto <b>Zakmardijeve stube<\/b><div style=\"font-size:0.9em\">Take the stairs<\/div>",
-              "maneuver": "turn-sharp-left",
-              "polyline": {
-                "points": "kasvGeao`BXo@Tk@@M@e@Ai@?MCYl@]\\UDG"
-              },
-              "start_location": {
-                "lat": 45.8141353,
-                "lng": 15.9747471
-              },
-              "travel_mode": "WALKING"
-            },
-            {
-              "distance": {
-                "text": "92 m",
-                "value": 92
-              },
-              "duration": {
-                "text": "1 min",
-                "value": 62
-              },
-              "end_location": {
-                "lat": 45.8133202,
-                "lng": 15.9773315
-              },
-              "html_instructions": "Turn <b>left<\/b> onto <b>Trg bana Josipa Jelačića<\/b>",
-              "maneuver": "turn-left",
-              "polyline": {
-                "points": "k}rvGcjo`BH}@De@RaC"
-              },
-              "start_location": {
-                "lat": 45.813498,
-                "lng": 15.976176
-              },
-              "travel_mode": "WALKING"
-            }
-          ],
-          "traffic_speed_entry": [],
-          "via_waypoint": []
-        }
-      ],
-      "overview_polyline": {
-        "points": "_bsvGw`p`BUhBKJQvAFRHNDDJ?dAGjATt@Hd@Dd@Lz@R_@~B^AbBNnCPFnEXhL~AhH\\zAR`@n@jDLdAD|@?XF]v@dBCXB`@H??j@pACqAB?k@I?Ca@BYw@eBG\\?YE}@MeAo@kDoGLiGND}EcC?iBBM?EC?YEAK@?IJ[Zy@TyCDiBFAFH@PAZXo@Vy@?oACg@jAs@DGH}@XgD"
-      },
-      "summary": "Masarykova ul.",
-      "warnings": [
-        "Walking directions are in beta.    Use caution – This route may be missing sidewalks or pedestrian paths."
-      ],
-      "waypoint_order": [
-        0,
-        1
-      ]
-    }
-  ],
-  "status": "OK"
-}
+[
+  {
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#242f3e"
+      }
+    ]
+  },
+  {
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#746855"
+      }
+    ]
+  },
+  {
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#242f3e"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.land_parcel",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.locality",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#d59563"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.neighborhood",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "labels.text",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#d59563"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#263c3f"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#6b9a76"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#38414e"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#212a37"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "labels",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "labels.icon",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#9ca5b3"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#746855"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#1f2835"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#f3d19c"
+      }
+    ]
+  },
+  {
+    "featureType": "transit",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "transit",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#2f3948"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.station",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#d59563"
+      }
+    ]
+  },
+  {
+    "featureType": "water",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#17263c"
+      }
+    ]
+  },
+  {
+    "featureType": "water",
+    "elementType": "labels.text",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "water",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#515c6d"
+      }
+    ]
+  },
+  {
+    "featureType": "water",
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#17263c"
+      }
+    ]
+  }
+]

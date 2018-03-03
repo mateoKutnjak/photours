@@ -1,8 +1,6 @@
 package com.example.mateo.photours;
 
 import android.Manifest;
-import android.arch.persistence.room.TypeConverter;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -48,17 +46,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,9 +64,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private ListView listView;
     private ArrayAdapter<String> adapter;
-    private List<LatLng> currentSteps;
-
-    private Gson gson = new Gson();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -192,7 +181,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         try {
             boolean success = mMap.setMapStyle(
                     MapStyleOptions.loadRawResourceStyle(
-                            this, R.raw.map_style_retro_labels));
+                            this, R.raw.map_style_aubergine_labels));
 
             if (!success) {
                 Log.e(TAG, "Style parsing failed.");
@@ -341,7 +330,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 lineOptions.color(Color.GRAY);
             }
 
-            currentSteps = points;
             // Drawing polyline in the Google Map for the i-th route
             mMap.addPolyline(lineOptions);
         }
