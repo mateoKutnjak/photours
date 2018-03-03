@@ -5,7 +5,6 @@ import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
 
-import com.example.mateo.photours.database.entities.Landmark;
 import com.example.mateo.photours.database.entities.Route;
 
 import java.util.List;
@@ -20,8 +19,17 @@ public interface RouteDao {
     int countRoutes();
 
     @Insert
-    void insertAll(Route... routes);
+    long insert(Route route);
 
     @Delete
     void delete(Route route);
+
+    @Query("DELETE FROM route")
+    void clear();
+
+    @Query("SELECT * FROM route WHERE name = :name")
+    Route findByName(String name);
+
+    @Query("SELECT name FROM route")
+    List<String> getAllNames();
 }

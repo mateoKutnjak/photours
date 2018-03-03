@@ -33,7 +33,10 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.mateo.photours.database.AppDatabase;
+import com.example.mateo.photours.database.DatabaseInitializer;
 import com.example.mateo.photours.database.entities.Landmark;
+import com.example.mateo.photours.database.entities.LandmarkRoute;
+import com.example.mateo.photours.database.entities.Route;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -57,7 +60,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private ListView listView;
     private ArrayAdapter<String> adapter;
-    private PolylineOptions routePolyline;
     private AppDatabase db;
 
     @Override
@@ -65,16 +67,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        db = AppDatabase.getAppDatabase(getApplicationContext());
-
-//        Landmark l = new Landmark();
-//        l.setName("proba");
-//        db.landmarkDao().insertAll(l);
-
-//        List<Landmark> ls = db.landmarkDao().getAll();
-//        Toast.makeText(this, String.valueOf(ls), Toast.LENGTH_LONG).show();
-
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Global.REQUEST_LOCATION);
+
+        db = AppDatabase.getAppDatabase(getApplicationContext());
+        DatabaseInitializer.populateSync(db);
 
         addMapFragment();
         fillRouteList();
@@ -100,29 +96,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void fillRouteList() {
         listView = (ListView)findViewById(R.id.list);
 
-        TypedArray allRoutes = getResources().obtainTypedArray(R.array.allRoutes);
-        TypedArray route = null;
-
-        List<String> routeNames = new ArrayList<>();
-
-        for (int i = 0; i < allRoutes.length(); i++) {
-            int id = allRoutes.getResourceId(i, Global.ZERO);
-
-            if (id > 0) {
-                route = getResources().obtainTypedArray(id);
-                routeNames.add(route.getString(Global.ROUTE_NAME_INDEX));
-                route.recycle();
-            }
-        }
-        allRoutes.recycle();
+        List<Route> routes = db.routeDao().getAll();
+        List<String> routeNames = db.routeDao().getAllNames();
 
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, routeNames.toArray(new String[routeNames.size()]));
         listView.setAdapter(adapter);
 
         listView.setOnItemClickListener(new OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?>adapter, View v, int position, long id) {
-                drawRoute(position);
+            public void onItemClick(AdapterView<?> adapter, View v, int position, long id) {
+                drawRoute((String) adapter.getItemAtPosition(position));
             }
         });
     }
@@ -205,97 +188,83 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.e("MapsActivityRaw", "Can't find style.", e);
         }
 
-        drawRoute(Global.ZERO);
+        drawRoute((String) adapter.getItem(Global.ZERO));
     }
 
-    public void drawRoute(int positionClicked) {
+    public void drawRoute(String routeName) {
         mMap.clear();
 
-        String url = "https://maps.googleapis.com/maps/api/directions/json";
+//        String url = "https://maps.googleapis.com/maps/api/directions/json";
+//
+//        Uri.Builder builder = new Uri.Builder();
+//        builder.scheme("https")
+//                .authority("maps.googleapis.com")
+//                .appendPath("maps")
+//                .appendPath("api")
+//                .appendPath("directions")
+//                .appendPath("json")
+//                .appendQueryParameter("origin", "Toronto")
+//                .appendQueryParameter("destination", "Montreal")
+//                .appendQueryParameter("key", Global.SERVER_KEY)
+//                .appendQueryParameter("sensor", "true");
+//
+//        Log.d("a", "Request: " + builder.build().toString());
+//
+//
+//        JsonObjectRequest jsObjRequest = new JsonObjectRequest
+//                (Request.Method.GET, builder.build().toString(), null, new Response.Listener<JSONObject>() {
+//
+//                    @Override
+//                    public void onResponse(JSONObject response) {
+//                        ParserTask parserTask = new ParserTask();
+//                        parserTask.execute(response.toString());
+//                    }
+//                }, new Response.ErrorListener() {
+//
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//                        Log.d("a", "Error: " + error
+//                                + "\nStatus Code " + error.networkResponse.statusCode
+//                                + "\nResponse Data " + error.networkResponse.data
+//                                + "\nCause " + error.getCause()
+//                                + "\nmessage" + error.getMessage());
+//                    }
+//                }) {
+//            @Override
+//            public Map<String, String> getHeaders() throws AuthFailureError {
+//                HashMap<String, String> headers = new HashMap<String,String>();
+//                //headers.put("Content-Type", "application/json; charset=utf-8");
+//                return headers;
+//            }
+//            @Override
+//            public String getBodyContentType() {
+//                return "application/json";
+//            }
+//        };
+//
+//        RequestQueue queue = Volley.newRequestQueue(this);
+//        queue.add(jsObjRequest);
 
-        Uri.Builder builder = new Uri.Builder();
-        builder.scheme("https")
-                .authority("maps.googleapis.com")
-                .appendPath("maps")
-                .appendPath("api")
-                .appendPath("directions")
-                .appendPath("json")
-                .appendQueryParameter("origin", "Toronto")
-                .appendQueryParameter("destination", "Montreal")
-                .appendQueryParameter("key", Global.SERVER_KEY)
-                .appendQueryParameter("sensor", "true");
-
-        Log.d("a", "Request: " + builder.build().toString());
+        // ====================================
 
 
-        JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                (Request.Method.GET, builder.build().toString(), null, new Response.Listener<JSONObject>() {
+        Route route = db.routeDao().findByName(routeName);
+        List<LandmarkRoute> landmarkRoutes = db.landmarkRouteDao().getAll();
+        List<Landmark> landmarks = db.landmarkRouteDao().findLandmarksForRouteId(route.uid);
 
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        ParserTask parserTask = new ParserTask();
-                        parserTask.execute(response.toString());
-                    }
-                }, new Response.ErrorListener() {
+        for(Landmark landmark : landmarks) {
+            LatLng point = new LatLng(landmark.latitude, landmark.longitude);
 
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d("a", "Error: " + error
-                                + "\nStatus Code " + error.networkResponse.statusCode
-                                + "\nResponse Data " + error.networkResponse.data
-                                + "\nCause " + error.getCause()
-                                + "\nmessage" + error.getMessage());
-                    }
-                }) {
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                HashMap<String, String> headers = new HashMap<String,String>();
-                //headers.put("Content-Type", "application/json; charset=utf-8");
-                return headers;
-            }
-            @Override
-            public String getBodyContentType() {
-                return "application/json";
-            }
-        };
-
-        RequestQueue queue = Volley.newRequestQueue(this);
-        queue.add(jsObjRequest);
-
-
-        TypedArray allRoutes = getResources().obtainTypedArray(R.array.allRoutes);
-
-        int id = allRoutes.getResourceId(positionClicked, Global.ZERO);
-        TypedArray route = getResources().obtainTypedArray(id);
-        allRoutes.recycle();
-
-        TypedArray landmark = null;
-
-        for (int i = 0; i < route.length(); i++) {
-            int landmarkID = route.getResourceId(i, Global.ZERO);
-
-            if (landmarkID > 0) {
-                landmark = getResources().obtainTypedArray(landmarkID);
-
-                String name = landmark.getString(Global.LANDMARK_NAME_INDEX);
-                double latitude = landmark.getFloat(Global.LANDMARK_LATITUDE_INDEX, Global.ZERO);
-                double longitude = landmark.getFloat(Global.LANDMARK_LONGITUDE_INDEX, Global.ZERO);
-
-                LatLng point = new LatLng(latitude, longitude);
-
-                mMap.addMarker(new MarkerOptions()
-                        .position(point)
-                        .title(name)
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-
-                if(i == Global.ONE) {
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(point));
-                }
-
-                landmark.recycle();
-            }
+            mMap.addMarker(new MarkerOptions()
+                    .position(point)
+                    .title(landmark.name)
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
         }
-        route.recycle();
+
+//        mMap.moveCamera(CameraUpdateFactory.newLatLng(
+//                new LatLng(
+//                        landmarks.get(0).latitude,
+//                        landmarks.get(0).longitude)));
     }
 
     private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String,String>>>> {

@@ -9,7 +9,6 @@ import com.example.mateo.photours.database.entities.Landmark;
 
 import java.util.List;
 
-
 @Dao
 public interface LandmarkDao {
 
@@ -17,11 +16,17 @@ public interface LandmarkDao {
     List<Landmark> getAll();
 
     @Query("SELECT COUNT(*) from landmark")
-    int countUsers();
+    int count();
 
     @Insert
-    void insertAll(Landmark... landmarks);
+    long insert(Landmark landmark);
 
     @Delete
     void delete(Landmark landmark);
+
+    @Query("DELETE FROM landmark")
+    void clear();
+
+    @Query("SELECT * FROM landmark WHERE name = :name")
+    Landmark findByName(String name);
 }

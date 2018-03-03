@@ -3,39 +3,30 @@ package com.example.mateo.photours.database.entities;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
+import android.arch.persistence.room.Index;
+import android.arch.persistence.room.PrimaryKey;
 
-@Entity(foreignKeys = {
-        @ForeignKey(entity = Route.class,
-                parentColumns = "id",
-                childColumns = "routeId",
-                onDelete = ForeignKey.CASCADE),
-        @ForeignKey(entity = Route.class,
-                parentColumns = "id",
-                childColumns = "routeId",
-                onDelete = ForeignKey.CASCADE)
-})
+@Entity(tableName = "landmarkroute"
+//        foreignKeys = {
+//                @ForeignKey(entity = Route.class,
+//                        parentColumns = "uid",
+//                        childColumns = "routeId",
+//                        onDelete = ForeignKey.CASCADE),
+//                @ForeignKey(entity = Landmark.class,
+//                        parentColumns = "uid",
+//                        childColumns = "landmarkId",
+//                        onDelete = ForeignKey.CASCADE),
+//        }
+)
 
 public class LandmarkRoute {
 
-    @ColumnInfo(name = "routeId")
-    private int routeId;
+    @PrimaryKey(autoGenerate = true)
+    public long uid;
 
-    @ColumnInfo(name = "landmarkId")
-    private int landmarkId;
+    @ForeignKey(entity = Route.class, parentColumns = "uid", childColumns = "routeId", onDelete = ForeignKey.CASCADE)
+    public long routeId;
 
-    public int getRouteId() {
-        return routeId;
-    }
-
-    public void setRouteId(int routeId) {
-        this.routeId = routeId;
-    }
-
-    public int getLandmarkId() {
-        return landmarkId;
-    }
-
-    public void setLandmarkId(int landmarkId) {
-        this.landmarkId = landmarkId;
-    }
+    @ForeignKey(entity = Landmark.class, parentColumns = "uid", childColumns = "landmarkId", onDelete = ForeignKey.CASCADE)
+    public long landmarkId;
 }

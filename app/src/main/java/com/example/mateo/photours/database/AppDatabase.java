@@ -6,11 +6,13 @@ import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 
 import com.example.mateo.photours.database.dao.LandmarkDao;
+import com.example.mateo.photours.database.dao.LandmarkRouteDao;
 import com.example.mateo.photours.database.dao.RouteDao;
 import com.example.mateo.photours.database.entities.Landmark;
+import com.example.mateo.photours.database.entities.LandmarkRoute;
 import com.example.mateo.photours.database.entities.Route;
 
-@Database(entities = {Landmark.class, Route.class}, version = 1, exportSchema = false)
+@Database(entities = {Landmark.class, Route.class, LandmarkRoute.class}, version = 6, exportSchema = false)
 
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -18,6 +20,7 @@ public abstract class AppDatabase extends RoomDatabase {
 
     public abstract LandmarkDao landmarkDao();
     public abstract RouteDao routeDao();
+    public abstract LandmarkRouteDao landmarkRouteDao();
 
     public static AppDatabase getAppDatabase(Context context) {
         if (INSTANCE == null) {
@@ -26,6 +29,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             // allow queries on the main thread.
                             // Don't do this on a real app! See PersistenceBasicSample for an example.
                             .allowMainThreadQueries()
+                            .fallbackToDestructiveMigration()
                             .build();
         }
         return INSTANCE;
