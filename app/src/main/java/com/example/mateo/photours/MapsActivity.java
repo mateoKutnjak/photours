@@ -25,6 +25,13 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -33,10 +40,17 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.JsonObject;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -168,26 +182,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
 
-        if (mMap != null) {
-            mMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
-
-                @Override
-                public void onMyLocationChange(Location arg0) {
-                    // TODO Auto-generated method stub
-
-//                    CameraUpdate center= CameraUpdateFactory.newLatLng(new LatLng(arg0.getLatitude(), arg0.getLongitude()));
-//                    CameraUpdate zoom=CameraUpdateFactory.zoomTo(12);
-
-//                    mMap.moveCamera(center);
-//                    mMap.animateCamera(zoom);
-                }
-            });
-
-        }
-
         try {
-            // Customise the styling of the base map using a JSON object defined
-            // in a raw resource file.
             boolean success = mMap.setMapStyle(
                     MapStyleOptions.loadRawResourceStyle(
                             this, R.raw.map_style_retro_labels));
@@ -204,7 +199,57 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void drawRoute(int positionClicked) {
         mMap.clear();
-        //mMap.setMyLocationEnabled(true);
+
+        String url = "https://maps.googleapis.com/maps/api/directions/json";
+
+//        Uri.Builder builder = new Uri.Builder();
+//        builder.scheme("https")
+//                .authority("maps.googleapis.com")
+//                .appendPath("maps")
+//                .appendPath("api")
+//                .appendPath("directions")
+//                .appendPath("json")
+//                .appendQueryParameter("origin", "Toronto")
+//                .appendQueryParameter("destination", "Montreal")
+//                .appendQueryParameter("key", "AIzaSyCZypjPER2u8bHI65uv73DHE4B-rUoztpU")
+//                .appendQueryParameter("sensor", "true");
+//
+//        Log.d("a", "Request: " + builder.build().toString());
+//
+//
+//        JsonObjectRequest jsObjRequest = new JsonObjectRequest
+//                (Request.Method.GET, builder.build().toString(), null, new Response.Listener<JSONObject>() {
+//
+//                    @Override
+//                    public void onResponse(JSONObject response) {
+//                        Log.d("a", "Response: " + response.toString());
+//                    }
+//                }, new Response.ErrorListener() {
+//
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//                        Log.d("a", "Error: " + error
+//                                + "\nStatus Code " + error.networkResponse.statusCode
+//                                + "\nResponse Data " + error.networkResponse.data
+//                                + "\nCause " + error.getCause()
+//                                + "\nmessage" + error.getMessage());
+//                    }
+//                }) {
+//            @Override
+//            public Map<String, String> getHeaders() throws AuthFailureError {
+//                HashMap<String, String> headers = new HashMap<String,String>();
+//                //headers.put("Content-Type", "application/json; charset=utf-8");
+//                return headers;
+//            }
+//            @Override
+//            public String getBodyContentType() {
+//                return "application/json";
+//            }
+//        };
+//
+//        RequestQueue queue = Volley.newRequestQueue(this);
+//        queue.add(jsObjRequest);
+
 
         TypedArray allRoutes = getResources().obtainTypedArray(R.array.allRoutes);
 
