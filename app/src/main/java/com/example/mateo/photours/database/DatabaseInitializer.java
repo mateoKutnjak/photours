@@ -61,9 +61,9 @@ public class DatabaseInitializer {
         long routeId_interestingLandmarks = addRoute(db, "Interesting landmarks", 0.0);
 
         addLandmarkRoute(db, landmarkId_zagrebCathedral, routeId_famousLandmarks);
-        addLandmarkRoute(db, landmarkId_croatianNationalTheatre, routeId_famousLandmarks);
         addLandmarkRoute(db, landmarkId_lotrscakTower, routeId_famousLandmarks);
         addLandmarkRoute(db, landmarkId_banJelacicMonument, routeId_famousLandmarks);
+        addLandmarkRoute(db, landmarkId_croatianNationalTheatre, routeId_famousLandmarks);
 
         addLandmarkRoute(db, landmarkId_croatianNationalTheatre, routeId_interestingLandmarks);
         addLandmarkRoute(db, landmarkId_lotrscakTower, routeId_interestingLandmarks);

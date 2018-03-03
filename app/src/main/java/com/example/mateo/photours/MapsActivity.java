@@ -1,10 +1,11 @@
 package com.example.mateo.photours;
 
 import android.Manifest;
+import android.arch.persistence.room.TypeConverter;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -18,6 +19,7 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -35,10 +37,9 @@ import com.android.volley.toolbox.Volley;
 import com.example.mateo.photours.database.AppDatabase;
 import com.example.mateo.photours.database.DatabaseInitializer;
 import com.example.mateo.photours.database.entities.Landmark;
-import com.example.mateo.photours.database.entities.LandmarkRoute;
 import com.example.mateo.photours.database.entities.Route;
 import com.example.mateo.photours.util.Coordinate2String;
-import com.google.android.gms.maps.CameraUpdateFactory;
+import com.example.mateo.photours.util.JSONParser;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -47,21 +48,33 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
+    private static final String TAG = "MapsActivity";
+
+    private AppDatabase db;
+
     private GoogleMap mMap;
     private ListView listView;
     private ArrayAdapter<String> adapter;
-    private AppDatabase db;
+    private List<LatLng> currentSteps;
+
+    private Gson gson = new Gson();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +110,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void fillRouteList() {
         listView = (ListView)findViewById(R.id.list);
 
-        List<Route> routes = db.routeDao().getAll();
         List<String> routeNames = db.routeDao().getAllNames();
 
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, routeNames.toArray(new String[routeNames.size()]));
@@ -183,10 +195,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             this, R.raw.map_style_retro_labels));
 
             if (!success) {
-                Log.e("MapsActivityRaw", "Style parsing failed.");
+                Log.e(TAG, "Style parsing failed.");
             }
         } catch (Resources.NotFoundException e) {
-            Log.e("MapsActivityRaw", "Can't find style.", e);
+            Log.e(TAG, "Can't find style.", e);
         }
 
         drawRoute((String) adapter.getItem(Global.ZERO));
@@ -198,7 +210,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Route route = db.routeDao().findByName(routeName);
         List<Landmark> landmarks = db.landmarkRouteDao().findLandmarksForRouteId(route.uid);
 
-        downloadDirections(landmarks);
+        downloadDirections(route, landmarks);
 
         for(Landmark landmark : landmarks) {
             LatLng point = new LatLng(landmark.latitude, landmark.longitude);
@@ -215,13 +227,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //                        landmarks.get(0).longitude)));
     }
 
-    private void downloadDirections(List<Landmark> landmarks) {
+    private void downloadDirections(final Route route, List<Landmark> landmarks) {
         if(landmarks.size() < 2) {
             throw new IllegalArgumentException();
         }
 
         Coordinate2String c2s = new Coordinate2String(landmarks);
-        String s = c2s.getWaypointsParam();
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")
@@ -233,18 +244,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .appendQueryParameter("origin", c2s.getOriginParam())
                 .appendQueryParameter("destination", c2s.getDestParam())
                 .appendQueryParameter("mode", Global.TRAVEL_MODE_WALKING)
-                .appendQueryParameter("waypoints", c2s.getWaypointsParam())
+                .appendQueryParameter("waypoints", c2s.getWaypointsParam(true))
                 .appendQueryParameter("key", Global.SERVER_KEY)
                 .appendQueryParameter("sensor", "true");
 
-        Log.d("a", "Request: " + builder.build().toString());
+        Log.d(TAG, "Request: " + builder.build().toString());
 
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
                 (Request.Method.GET, builder.build().toString(), null, new Response.Listener<JSONObject>() {
 
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.d("a", response.toString());
+                        Log.d(TAG, response.toString());
+
+                        Pair<Integer, Integer> disDur = JSONParser.getDistanceDurationFromDirections(response);
+                        db.routeDao().updateDistance(route.uid, (double)disDur.first / 1000);
+
                         ParserTask parserTask = new ParserTask();
                         parserTask.execute(response.toString());
                     }
@@ -252,7 +267,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.d("a", "Error: " + error
+                        Log.d(TAG, "Error: " + error
                                 + "\nStatus Code " + error.networkResponse.statusCode
                                 + "\nResponse Data " + error.networkResponse.data
                                 + "\nCause " + error.getCause()
@@ -326,6 +341,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 lineOptions.color(Color.GRAY);
             }
 
+            currentSteps = points;
             // Drawing polyline in the Google Map for the i-th route
             mMap.addPolyline(lineOptions);
         }

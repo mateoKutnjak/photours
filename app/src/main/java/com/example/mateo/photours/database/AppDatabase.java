@@ -12,7 +12,7 @@ import com.example.mateo.photours.database.entities.Landmark;
 import com.example.mateo.photours.database.entities.LandmarkRoute;
 import com.example.mateo.photours.database.entities.Route;
 
-@Database(entities = {Landmark.class, Route.class, LandmarkRoute.class}, version = 6, exportSchema = false)
+@Database(entities = {Landmark.class, Route.class, LandmarkRoute.class}, version = 7, exportSchema = false)
 
 public abstract class AppDatabase extends RoomDatabase {
 

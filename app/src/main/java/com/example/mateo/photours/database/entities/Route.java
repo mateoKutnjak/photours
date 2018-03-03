@@ -18,4 +18,7 @@ public class Route {
 
     @ColumnInfo(name = "length")
     public double length;
+
+    @ColumnInfo(name = "steps")
+    public String steps;
 }

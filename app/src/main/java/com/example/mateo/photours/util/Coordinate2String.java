@@ -25,8 +25,14 @@ public class Coordinate2String {
         return coordinates.get(coordinates.size()-1);
     }
 
-    public String getWaypointsParam() {
+    public String getWaypointsParam(boolean optimization) {
+        if(coordinates.size() <= 2) {
+            return "";
+        }
+
         StringBuilder sb = new StringBuilder();
+
+        sb.append(optimization ? "optimize:true|" : "");
 
         for(int i = 1; i < coordinates.size()-1; i++) {
             sb.append(coordinates.get(i) + "|");
