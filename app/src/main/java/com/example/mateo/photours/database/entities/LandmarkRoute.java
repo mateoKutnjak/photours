@@ -6,18 +6,7 @@ import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 
-@Entity(tableName = "landmarkroute"
-//        foreignKeys = {
-//                @ForeignKey(entity = Route.class,
-//                        parentColumns = "uid",
-//                        childColumns = "routeId",
-//                        onDelete = ForeignKey.CASCADE),
-//                @ForeignKey(entity = Landmark.class,
-//                        parentColumns = "uid",
-//                        childColumns = "landmarkId",
-//                        onDelete = ForeignKey.CASCADE),
-//        }
-)
+@Entity(tableName = "landmarkroute")
 
 public class LandmarkRoute {
 

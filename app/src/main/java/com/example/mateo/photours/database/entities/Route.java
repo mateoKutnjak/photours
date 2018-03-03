@@ -3,9 +3,6 @@ package com.example.mateo.photours.database.entities;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
-import android.arch.persistence.room.TypeConverters;
-
-import com.google.android.gms.maps.model.PolylineOptions;
 
 @Entity(tableName = "route")
 public class Route {

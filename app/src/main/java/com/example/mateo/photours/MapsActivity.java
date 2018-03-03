@@ -47,7 +47,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -217,14 +216,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             mMap.addMarker(markers.get(markers.size()-1));
         }
-
-        Landmark origin = landmarks.get(0);
-        Landmark dest = landmarks.get(landmarks.size()-1);
-
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(
-                new LatLng(
-                        0.5 * (origin.latitude + dest.latitude),
-                        0.5 * (origin.longitude + dest.longitude))));
 
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
         for (MarkerOptions marker : markers) {

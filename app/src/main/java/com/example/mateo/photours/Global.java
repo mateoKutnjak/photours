@@ -24,12 +24,6 @@ public class Global extends Application {
     public static final int CAMERA_PERMISSIONS_REQUEST = 2;
     public static final int CAMERA_IMAGE_REQUEST = 3;
 
-    public static final int LANDMARK_NAME_INDEX = 0;
-    public static final int LANDMARK_LATITUDE_INDEX = 1;
-    public static final int LANDMARK_LONGITUDE_INDEX = 2;
-
-    public static final int ROUTE_NAME_INDEX = 0;
-
     public static final int REQUEST_LOCATION = 1;
     public static final String TRAVEL_MODE_WALKING = "walking";
 }
