@@ -52,8 +52,8 @@ public class DatabaseInitializer {
         db.routeDao().clear();
         db.landmarkRouteDao().clear();
 
-        long landmarkId_zagrebCathedral = addLandmark(db, "Zagreb cathedral", 45.814436, 15.979879, "1000 years old");
-        long landmarkId_croatianNationalTheatre = addLandmark(db, "Croatian national theater", 45.809406, 15.969945, "Coming here with hobos");
+        long landmarkId_zagrebCathedral = addLandmark(db, "Zagreb cathedral", 45.814548, 15.979477, "1000 years old");
+        long landmarkId_croatianNationalTheatre = addLandmark(db, "Croatian national theater", 45.809664, 15.969938, "Coming here with hobos");
         long landmarkId_lotrscakTower = addLandmark(db, "Lotrscak tower", 45.814626, 15.973275, "bum bum");
         long landmarkId_banJelacicMonument = addLandmark(db, "Ban Jelacic monument", 45.813174, 15.977312, "Nademo se kod konja");
 
