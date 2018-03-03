@@ -28,7 +28,7 @@ public class Coordinate2String {
     public String getWaypointsParam() {
         StringBuilder sb = new StringBuilder();
 
-        for(int i = 1; i < coordinates.size()-2; i++) {
+        for(int i = 1; i < coordinates.size()-1; i++) {
             sb.append(coordinates.get(i) + "|");
         }
 

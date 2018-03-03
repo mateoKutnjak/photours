@@ -221,6 +221,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         Coordinate2String c2s = new Coordinate2String(landmarks);
+        String s = c2s.getWaypointsParam();
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")
