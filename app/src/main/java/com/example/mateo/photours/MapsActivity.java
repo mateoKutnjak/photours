@@ -38,12 +38,16 @@ import com.example.mateo.photours.database.entities.Landmark;
 import com.example.mateo.photours.database.entities.Route;
 import com.example.mateo.photours.util.Coordinate2String;
 import com.example.mateo.photours.util.JSONParser;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -201,19 +205,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         downloadDirections(route, landmarks);
 
+        List<MarkerOptions> markers = new ArrayList<>();
+
         for(Landmark landmark : landmarks) {
             LatLng point = new LatLng(landmark.latitude, landmark.longitude);
 
-            mMap.addMarker(new MarkerOptions()
+            markers.add(new MarkerOptions()
                     .position(point)
                     .title(landmark.name)
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+
+            mMap.addMarker(markers.get(markers.size()-1));
         }
 
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(
-//                new LatLng(
-//                        landmarks.get(0).latitude,
-//                        landmarks.get(0).longitude)));
+        Landmark origin = landmarks.get(0);
+        Landmark dest = landmarks.get(landmarks.size()-1);
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(
+                new LatLng(
+                        0.5 * (origin.latitude + dest.latitude),
+                        0.5 * (origin.longitude + dest.longitude))));
+
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        for (MarkerOptions marker : markers) {
+            builder.include(marker.getPosition());
+        }
+        LatLngBounds bounds = builder.build();
+
+        int width = getResources().getDisplayMetrics().widthPixels;
+        int height = getResources().getDisplayMetrics().heightPixels;
+        int padding = (int) (width * 0.10);
+
+        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding);
+
+        mMap.animateCamera(cu);
     }
 
     private void downloadDirections(final Route route, List<Landmark> landmarks) {
