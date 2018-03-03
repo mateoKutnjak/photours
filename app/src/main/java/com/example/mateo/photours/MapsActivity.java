@@ -5,9 +5,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.location.Location;
-import android.location.LocationManager;
+import android.graphics.Color;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -32,6 +32,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.mateo.photours.database.AppDatabase;
+import com.example.mateo.photours.database.entities.Landmark;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -40,13 +42,11 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.gson.JsonObject;
+import com.google.android.gms.maps.model.PolylineOptions;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -57,11 +57,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private ListView listView;
     private ArrayAdapter<String> adapter;
+    private PolylineOptions routePolyline;
+    private AppDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        db = AppDatabase.getAppDatabase(getApplicationContext());
+
+//        Landmark l = new Landmark();
+//        l.setName("proba");
+//        db.landmarkDao().insertAll(l);
+
+//        List<Landmark> ls = db.landmarkDao().getAll();
+//        Toast.makeText(this, String.valueOf(ls), Toast.LENGTH_LONG).show();
 
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Global.REQUEST_LOCATION);
 
@@ -202,53 +213,54 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         String url = "https://maps.googleapis.com/maps/api/directions/json";
 
-//        Uri.Builder builder = new Uri.Builder();
-//        builder.scheme("https")
-//                .authority("maps.googleapis.com")
-//                .appendPath("maps")
-//                .appendPath("api")
-//                .appendPath("directions")
-//                .appendPath("json")
-//                .appendQueryParameter("origin", "Toronto")
-//                .appendQueryParameter("destination", "Montreal")
-//                .appendQueryParameter("key", "AIzaSyCZypjPER2u8bHI65uv73DHE4B-rUoztpU")
-//                .appendQueryParameter("sensor", "true");
-//
-//        Log.d("a", "Request: " + builder.build().toString());
-//
-//
-//        JsonObjectRequest jsObjRequest = new JsonObjectRequest
-//                (Request.Method.GET, builder.build().toString(), null, new Response.Listener<JSONObject>() {
-//
-//                    @Override
-//                    public void onResponse(JSONObject response) {
-//                        Log.d("a", "Response: " + response.toString());
-//                    }
-//                }, new Response.ErrorListener() {
-//
-//                    @Override
-//                    public void onErrorResponse(VolleyError error) {
-//                        Log.d("a", "Error: " + error
-//                                + "\nStatus Code " + error.networkResponse.statusCode
-//                                + "\nResponse Data " + error.networkResponse.data
-//                                + "\nCause " + error.getCause()
-//                                + "\nmessage" + error.getMessage());
-//                    }
-//                }) {
-//            @Override
-//            public Map<String, String> getHeaders() throws AuthFailureError {
-//                HashMap<String, String> headers = new HashMap<String,String>();
-//                //headers.put("Content-Type", "application/json; charset=utf-8");
-//                return headers;
-//            }
-//            @Override
-//            public String getBodyContentType() {
-//                return "application/json";
-//            }
-//        };
-//
-//        RequestQueue queue = Volley.newRequestQueue(this);
-//        queue.add(jsObjRequest);
+        Uri.Builder builder = new Uri.Builder();
+        builder.scheme("https")
+                .authority("maps.googleapis.com")
+                .appendPath("maps")
+                .appendPath("api")
+                .appendPath("directions")
+                .appendPath("json")
+                .appendQueryParameter("origin", "Toronto")
+                .appendQueryParameter("destination", "Montreal")
+                .appendQueryParameter("key", Global.SERVER_KEY)
+                .appendQueryParameter("sensor", "true");
+
+        Log.d("a", "Request: " + builder.build().toString());
+
+
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest
+                (Request.Method.GET, builder.build().toString(), null, new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        ParserTask parserTask = new ParserTask();
+                        parserTask.execute(response.toString());
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("a", "Error: " + error
+                                + "\nStatus Code " + error.networkResponse.statusCode
+                                + "\nResponse Data " + error.networkResponse.data
+                                + "\nCause " + error.getCause()
+                                + "\nmessage" + error.getMessage());
+                    }
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> headers = new HashMap<String,String>();
+                //headers.put("Content-Type", "application/json; charset=utf-8");
+                return headers;
+            }
+            @Override
+            public String getBodyContentType() {
+                return "application/json";
+            }
+        };
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        queue.add(jsObjRequest);
 
 
         TypedArray allRoutes = getResources().obtainTypedArray(R.array.allRoutes);
@@ -258,30 +270,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         allRoutes.recycle();
 
         TypedArray landmark = null;
-
-//        int originID = route.getResourceId(Global.ZERO, Integer.MAX_VALUE);
-//        int destinationID = route.getResourceId(route.length()-1, Integer.MAX_VALUE);
-//
-//        TypedArray originTA = route.getResources().obtainTypedArray(originID);
-//        TypedArray destinationTA = route.getResources().obtainTypedArray(destinationID);
-//
-//        LatLng origin = new LatLng(originTA.getFloat(1, 0), originTA.getFloat(2, 0));
-//        LatLng destination = new LatLng(destinationTA.getFloat(1, 0), destinationTA.getFloat(2, 0));
-//        GoogleDirection.withServerKey(getResources().getString(R.string.google_maps_key))
-//                .from(origin)
-//                .to(destination)
-//                .transportMode(TransportMode.WALKING)
-//                .execute(new DirectionCallback() {
-//                    @Override
-//                    public void onDirectionSuccess(Direction direction, String rawBody) {
-//                        // Do something here
-//                    }
-//
-//                    @Override
-//                    public void onDirectionFailure(Throwable t) {
-//                        // Do something here
-//                    }
-//                });
 
         for (int i = 0; i < route.length(); i++) {
             int landmarkID = route.getResourceId(i, Global.ZERO);
@@ -308,5 +296,61 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
         route.recycle();
+    }
+
+    private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String,String>>>> {
+
+        @Override
+        protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
+
+            JSONObject jObject;
+            List<List<HashMap<String, String>>> routes = null;
+
+            try{
+                jObject = new JSONObject(jsonData[0]);
+                DirectionsJSONParser parser = new DirectionsJSONParser();
+
+                // Starts parsing data
+                routes = parser.parse(jObject);
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+            return routes;
+        }
+
+        @Override
+        protected void onPostExecute(List<List<HashMap<String, String>>> result) {
+            ArrayList<LatLng> points = null;
+            PolylineOptions lineOptions = null;
+            MarkerOptions markerOptions = new MarkerOptions();
+
+            // Traversing through all the routes
+            for(int i=0;i<result.size();i++){
+                points = new ArrayList<LatLng>();
+                lineOptions = new PolylineOptions();
+
+                // Fetching i-th route
+                List<HashMap<String, String>> path = result.get(i);
+
+                // Fetching all the points in i-th route
+                for(int j=0;j<path.size();j++){
+                    HashMap<String,String> point = path.get(j);
+
+                    double lat = Double.parseDouble(point.get("lat"));
+                    double lng = Double.parseDouble(point.get("lng"));
+                    LatLng position = new LatLng(lat, lng);
+
+                    points.add(position);
+                }
+
+                // Adding all the points in the route to LineOptions
+                lineOptions.addAll(points);
+                lineOptions.width(15);
+                lineOptions.color(Color.GRAY);
+            }
+
+            // Drawing polyline in the Google Map for the i-th route
+            mMap.addPolyline(lineOptions);
+        }
     }
 }

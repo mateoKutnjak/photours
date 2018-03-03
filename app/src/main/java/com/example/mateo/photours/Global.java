@@ -15,6 +15,8 @@ public class Global extends Application {
     public static final int ONE = 1;
 
     public static final String CLOUD_VISION_API_KEY = "AIzaSyCh-7eNuvSOLM4qFnV5Z3z_UCBM25Mwx0s";
+    public static final String SERVER_KEY = "AIzaSyCZypjPER2u8bHI65uv73DHE4B-rUoztpU";
+
     public static final String FILE_NAME = "temp.jpg";
     public static final String ANDROID_CERT_HEADER = "X-Android-Cert";
     public static final String ANDROID_PACKAGE_HEADER = "X-Android-Package";
