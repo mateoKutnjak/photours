@@ -1,4 +1,4 @@
-package com.example.mateo.photours;
+package com.example.mateo.photours.util;
 
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;

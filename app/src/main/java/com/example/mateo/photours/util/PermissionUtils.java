@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.mateo.photours;
+package com.example.mateo.photours.util;
 
 import android.app.Activity;
 import android.content.pm.PackageManager;

@@ -1,4 +1,4 @@
-package com.example.mateo.photours;
+package com.example.mateo.photours.util;
 
 import com.google.android.gms.maps.model.LatLng;
 

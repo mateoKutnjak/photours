@@ -19,10 +19,7 @@ import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView;
+import android.widget.ExpandableListView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -32,12 +29,15 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.mateo.photours.adapters.ELVAdapter;
 import com.example.mateo.photours.database.AppDatabase;
 import com.example.mateo.photours.database.DatabaseInitializer;
 import com.example.mateo.photours.database.entities.Landmark;
 import com.example.mateo.photours.database.entities.Route;
 import com.example.mateo.photours.util.Coordinate2String;
+import com.example.mateo.photours.util.DirectionsJSONParser;
 import com.example.mateo.photours.util.JSONParser;
+import com.example.mateo.photours.util.PermissionUtils;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -65,8 +65,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private AppDatabase db;
 
     private GoogleMap mMap;
-    private ListView listView;
-    private ArrayAdapter<String> adapter;
+    private ExpandableListView elv;
+    private ELVAdapter adapter;
+    private List<String> listCategories;
+    private Map<String, List<String>> childMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,17 +102,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void fillRouteList() {
-        listView = (ListView)findViewById(R.id.list);
+        elv = (ExpandableListView) findViewById(R.id.expList);
+        listCategories = new ArrayList<>();
+        childMap = new HashMap<>();
 
-        List<String> routeNames = db.routeDao().getAllNames();
+        List<Route> routes = db.routeDao().getAll();
+        listCategories = db.routeDao().getAllNames();
 
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, routeNames.toArray(new String[routeNames.size()]));
-        listView.setAdapter(adapter);
+        for(int i = 0; i < routes.size(); i++) {
+            List<Landmark> landmarks = db.landmarkRouteDao().findLandmarksForRouteId(routes.get(i).uid);
+            List<String> landmarkNames = new ArrayList<>();
 
-        listView.setOnItemClickListener(new OnItemClickListener() {
+            for(Landmark landmark : landmarks) {
+                landmarkNames.add(landmark.name);
+            }
+
+            childMap.put(listCategories.get(i), landmarkNames);
+        }
+
+        adapter = new ELVAdapter(listCategories, childMap, this);
+        elv.setAdapter(adapter);
+
+        elv.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapter, View v, int position, long id) {
-                drawRoute((String) adapter.getItemAtPosition(position));
+            public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
+                drawRoute((String) adapter.getGroup(groupPosition));
+                return false;
             }
         });
     }
@@ -193,7 +210,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.e(TAG, "Can't find style.", e);
         }
 
-        drawRoute((String) adapter.getItem(Global.ZERO));
+        drawRoute((String) adapter.getGroup(Global.ZERO));
     }
 
     public void drawRoute(String routeName) {
