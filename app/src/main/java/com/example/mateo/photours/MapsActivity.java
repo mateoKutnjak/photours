@@ -35,6 +35,7 @@ import com.example.mateo.photours.database.AppDatabase;
 import com.example.mateo.photours.database.DatabaseInitializer;
 import com.example.mateo.photours.database.entities.Landmark;
 import com.example.mateo.photours.database.entities.Route;
+import com.example.mateo.photours.database.views.RouteView;
 import com.example.mateo.photours.util.Coordinate2String;
 import com.example.mateo.photours.util.DirectionsJSONParser;
 import com.example.mateo.photours.util.JSONParser;
@@ -70,8 +71,8 @@ public class MapsActivity extends FragmentActivity implements
     private GoogleMap mMap;
     private ExpandableListView elv;
     private ELVAdapter adapter;
-    private List<String> listCategories;
-    private Map<String, List<String>> childMap;
+    private List<RouteView> listCategories;
+    private Map<RouteView, List<String>> childMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,9 +84,9 @@ public class MapsActivity extends FragmentActivity implements
         db = AppDatabase.getAppDatabase(getApplicationContext());
         DatabaseInitializer.populateSync(db);
 
-        addMapFragment();
         fillRouteList();
         addFloatingActionButton();
+        addMapFragment();
     }
 
     private void addMapFragment() {
@@ -110,7 +111,7 @@ public class MapsActivity extends FragmentActivity implements
         childMap = new HashMap<>();
 
         List<Route> routes = db.routeDao().getAll();
-        listCategories = db.routeDao().getAllNames();
+        listCategories = db.routeDao().getAllWithoutSteps();
 
         for(int i = 0; i < routes.size(); i++) {
             List<Landmark> landmarks = db.landmarkRouteDao().findLandmarksForRouteId(routes.get(i).uid);
@@ -129,7 +130,7 @@ public class MapsActivity extends FragmentActivity implements
         elv.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
-                drawRoute((String) adapter.getGroup(groupPosition));
+                drawRoute((RouteView)adapter.getGroup(groupPosition));
                 return false;
             }
         });
@@ -222,13 +223,13 @@ public class MapsActivity extends FragmentActivity implements
             Log.e(TAG, "Can't find style.", e);
         }
 
-        drawRoute((String) adapter.getGroup(Global.ZERO));
+        drawRoute((RouteView)adapter.getGroup(Global.ZERO));
     }
 
-    public void drawRoute(String routeName) {
+    public void drawRoute(RouteView rv) {
         mMap.clear();
 
-        Route route = db.routeDao().findByName(routeName);
+        Route route = db.routeDao().findByName(rv.name);
         List<Landmark> landmarks = db.landmarkRouteDao().findLandmarksForRouteId(route.uid);
 
         downloadDirections(route, landmarks);
@@ -292,6 +293,7 @@ public class MapsActivity extends FragmentActivity implements
 
                         Pair<Integer, Integer> disDur = JSONParser.getDistanceDurationFromDirections(response);
                         db.routeDao().updateDistance(route.uid, (double)disDur.first / 1000);
+                        db.routeDao().updateDuration(route.uid, disDur.second);
 
                         ParserTask parserTask = new ParserTask();
                         parserTask.execute(response.toString());

@@ -1,13 +1,13 @@
-package com.example.mateo.photours.database.entities;
+package com.example.mateo.photours.database.views;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 
-@Entity(tableName = "route")
-public class Route {
+@Entity
+public class RouteView {
 
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey
     public long uid;
 
     @ColumnInfo(name = "name")
@@ -18,7 +18,4 @@ public class Route {
 
     @ColumnInfo(name = "duration")
     public int duration;
-
-    @ColumnInfo(name = "steps")
-    public String steps;
 }

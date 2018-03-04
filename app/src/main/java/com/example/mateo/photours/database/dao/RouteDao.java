@@ -7,6 +7,7 @@ import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Update;
 
 import com.example.mateo.photours.database.entities.Route;
+import com.example.mateo.photours.database.views.RouteView;
 
 import java.util.List;
 
@@ -37,9 +38,15 @@ public interface RouteDao {
     @Query("UPDATE route SET length = :distance WHERE uid = :uid")
     void updateDistance(long uid, double distance);
 
+    @Query("UPDATE route SET duration = :duration WHERE uid = :uid")
+    void updateDuration(long uid, int duration);
+
     @Query("UPDATE route SET steps = :steps WHERE uid = :uid")
     void updateSteps(long uid, String steps);
 
     @Query("SELECT steps FROM route WHERE uid = :uid")
     String getSteps(long uid);
+
+    @Query("SELECT uid, name, length, duration FROM route")
+    List<RouteView> getAllWithoutSteps();
 }

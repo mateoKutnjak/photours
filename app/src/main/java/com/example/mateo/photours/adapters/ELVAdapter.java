@@ -8,17 +8,20 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
 import com.example.mateo.photours.R;
+import com.example.mateo.photours.database.entities.Landmark;
+import com.example.mateo.photours.database.entities.Route;
+import com.example.mateo.photours.database.views.RouteView;
 
 import java.util.List;
 import java.util.Map;
 
 public class ELVAdapter extends BaseExpandableListAdapter {
 
-    private List<String> listCategory;
-    private Map<String, List<String>> childMap;
+    private List<RouteView> listCategory;
+    private Map<RouteView, List<String>> childMap;
     private Context context;
 
-    public ELVAdapter(List<String> listCategory, Map<String, List<String>> childMap, Context context) {
+    public ELVAdapter(List<RouteView> listCategory, Map<RouteView, List<String>> childMap, Context context) {
         this.listCategory = listCategory;
         this.childMap = childMap;
         this.context = context;
@@ -61,10 +64,29 @@ public class ELVAdapter extends BaseExpandableListAdapter {
 
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-        String categoryTitle = (String)getGroup(groupPosition);
+        String categoryTitle = ((RouteView)getGroup(groupPosition)).name;
+        double distance = ((RouteView)getGroup(groupPosition)).length;
+        int duration = ((RouteView)getGroup(groupPosition)).duration;
+
         convertView = LayoutInflater.from(context).inflate(R.layout.elv_group, null);
+
         TextView tvGroup = (TextView)convertView.findViewById(R.id.tvGroup);
+        TextView tvGroupDistance = (TextView)convertView.findViewById(R.id.tvGroupDistance);
+        TextView tvGroupDuration = (TextView)convertView.findViewById(R.id.tvGroupDuration);
+
         tvGroup.setText(categoryTitle);
+
+        if(distance >= 0) {
+            tvGroupDistance.setText(String.valueOf(distance));
+        } else {
+            tvGroupDistance.setText("");
+        }
+        if(duration >= 0) {
+            tvGroupDuration.setText(String.valueOf(duration));
+        } else {
+            tvGroupDuration.setText("");
+        }
+
         return convertView;
     }
 
