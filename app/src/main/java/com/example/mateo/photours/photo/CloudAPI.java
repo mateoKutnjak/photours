@@ -43,10 +43,9 @@ public class CloudAPI {
 
     private Uri photoUri;
     private Context context;
-
     private List<Landmark> results;
-
     private PhotoRecognitionListener listener;
+    private Bitmap photoBitmap;
 
     public CloudAPI(Context context, PhotoRecognitionListener listener) {
         this.context = context;
@@ -65,8 +64,9 @@ public class CloudAPI {
                                 1200);
 
                 callCloudVision(bitmap);
-//                imageView.setImageBitmap(setImage(getCameraFile().getPath(), 1200, 1200));
-                //                imageView.setImageBitmap(MediaStore.Images.Media.getBitmap(getContentResolver(), photoUri));
+                //bitmap = setImage(getCameraFile().getPath(), 1200, 1200);
+                photoBitmap = setImage(getCameraFile().getPath(), 1200, 1200);
+                //photoBitmap = setImage(MediaStore.Images.Media.getBitmap(context.getContentResolver(), photoUri), 1200, 1200);
 
             } catch (IOException e) {
                 Log.d(TAG, "Image picking failed because " + e.getMessage());
@@ -288,5 +288,9 @@ public class CloudAPI {
 
     public List<Landmark> getResults() {
         return results;
+    }
+
+    public Bitmap getBitmap() {
+        return photoBitmap;
     }
 }

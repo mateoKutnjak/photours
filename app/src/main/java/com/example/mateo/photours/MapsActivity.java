@@ -4,10 +4,12 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -18,9 +20,12 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.widget.ExpandableListView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.akexorcist.googledirection.model.Line;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -98,8 +103,10 @@ public class MapsActivity extends FragmentActivity implements
         initELV();
         fillELV();
 
-        addFloatingActionButton();
+        addCameraFAB();
         addMapFragment();
+
+        addInfoFAB();
     }
 
     private void initCloudAPI() {
@@ -117,12 +124,34 @@ public class MapsActivity extends FragmentActivity implements
         mapFragment.getMapAsync(this);
     }
 
-    private void addFloatingActionButton() {
+    private void addCameraFAB() {
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startCamera();
+            }
+        });
+    }
+
+    private void addInfoFAB() {
+        FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabClose);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CoordinatorLayout cl = (CoordinatorLayout)findViewById(R.id.infoCoordLayout);
+                LinearLayout ll = (LinearLayout)findViewById(R.id.infoLinLayout);
+
+                cl.setVisibility(CoordinatorLayout.INVISIBLE);
+                ll.setVisibility(LinearLayout.INVISIBLE);
+
+//                ImageView iv = (ImageView)findViewById(R.id.imageView);
+//                TextView tv = (TextView)findViewById(R.id.infoTextView);
+//                FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabClose);
+//
+//                iv.setVisibility(ImageView.INVISIBLE);
+//                tv.setVisibility(TextView.INVISIBLE);
+//                fab.setVisibility(FloatingActionButton.INVISIBLE);
             }
         });
     }
@@ -188,10 +217,7 @@ public class MapsActivity extends FragmentActivity implements
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == Global.CAMERA_IMAGE_REQUEST && resultCode == RESULT_OK) {
-            //startActivity(new Intent(this, PhotoActivity.class));
-            Toast.makeText(this, "a", Toast.LENGTH_LONG).show();
             cloudAPI.init();
-
         }
     }
 
@@ -397,16 +423,38 @@ public class MapsActivity extends FragmentActivity implements
 
     @Override
     public void photoRecognized(List<Landmark> results) {
-
         for(Landmark currLandmark : currentLandmarks) {
             for(Landmark result : results) {
                 if(currLandmark.cloudLabel.equals(result.cloudLabel)) {
-                    db.landmarkDao().setVisitedById(currLandmark.uid, true);
+
+                    setLandmarkVisited(currLandmark);
+                    createPopup(currLandmark);
                 }
             }
         }
 
         refreshMap();
+    }
+
+    private void createPopup(Landmark currLandmark) {
+        CoordinatorLayout cl = (CoordinatorLayout)findViewById(R.id.infoCoordLayout);
+        LinearLayout ll = (LinearLayout)findViewById(R.id.infoLinLayout);
+
+//        CoordinatorLayout mainCl = (CoordinatorLayout)findViewById(R.id.mainCoordLayout);
+//        LinearLayout mainLl = (LinearLayout)findViewById(R.id.mainLinLayout);
+
+        ImageView iv = (ImageView)findViewById(R.id.infoImageView);
+        TextView tv = (TextView)findViewById(R.id.infoTextView);
+
+        iv.setImageBitmap(cloudAPI.getBitmap());
+        tv.setText(currLandmark.name + " " + currLandmark.message);
+
+        cl.setVisibility(CoordinatorLayout.VISIBLE);
+        ll.setVisibility(LinearLayout.VISIBLE);
+    }
+
+    private void setLandmarkVisited(Landmark currLandmark) {
+        db.landmarkDao().setVisitedById(currLandmark.uid, true);
     }
 
     private void refreshMap() {
