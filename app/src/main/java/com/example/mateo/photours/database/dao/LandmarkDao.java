@@ -29,4 +29,10 @@ public interface LandmarkDao {
 
     @Query("SELECT * FROM landmark WHERE name = :name")
     Landmark findByName(String name);
+
+    @Query("SELECT visited FROM landmark WHERE name = :name")
+    boolean isVisitedByName(String name);
+
+    @Query("UPDATE landmark SET visited = :value WHERE uid = :uid")
+    void setVisitedById(long uid, boolean value);
 }

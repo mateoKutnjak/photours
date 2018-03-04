@@ -19,6 +19,7 @@ import android.util.Pair;
 import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -28,12 +29,15 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.mateo.photours.adapters.ELVAdapter;
+import com.example.mateo.photours.async.DirectionsListener;
 import com.example.mateo.photours.async.ParserTask;
 import com.example.mateo.photours.database.AppDatabase;
 import com.example.mateo.photours.database.DatabaseInitializer;
 import com.example.mateo.photours.database.entities.Landmark;
 import com.example.mateo.photours.database.entities.Route;
 import com.example.mateo.photours.database.views.RouteView;
+import com.example.mateo.photours.photo.CloudAPI;
+import com.example.mateo.photours.photo.PhotoRecognitionListener;
 import com.example.mateo.photours.util.Coordinate2String;
 import com.example.mateo.photours.util.JSONParser;
 import com.example.mateo.photours.util.PermissionUtils;
@@ -43,12 +47,12 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONObject;
 
@@ -59,19 +63,27 @@ import java.util.List;
 import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements
-        OnMapReadyCallback{
+        OnMapReadyCallback,
+        PhotoRecognitionListener,
+        DirectionsListener {
 
     private static final String TAG = "MapsActivity";
 
     private AppDatabase db;
 
     private GoogleMap mMap;
+
+    private List<Landmark> currentLandmarks;
     private List<Marker> currentMarkers;
+    private PolylineOptions directionsPO;
+    private int selectedRoutePosition;
 
     private ExpandableListView elv;
     private ELVAdapter adapter;
     private List<RouteView> listCategories;
     private Map<RouteView, List<String>> childMap;
+
+    private CloudAPI cloudAPI;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +92,7 @@ public class MapsActivity extends FragmentActivity implements
 
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Global.REQUEST_LOCATION);
 
+        initCloudAPI();
         initDatabase();
 
         initELV();
@@ -87,6 +100,10 @@ public class MapsActivity extends FragmentActivity implements
 
         addFloatingActionButton();
         addMapFragment();
+    }
+
+    private void initCloudAPI() {
+        cloudAPI = new CloudAPI(this, this);
     }
 
     private void initDatabase() {
@@ -171,7 +188,10 @@ public class MapsActivity extends FragmentActivity implements
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == Global.CAMERA_IMAGE_REQUEST && resultCode == RESULT_OK) {
-            startActivity(new Intent(this, PhotoActivity.class));
+            //startActivity(new Intent(this, PhotoActivity.class));
+            Toast.makeText(this, "a", Toast.LENGTH_LONG).show();
+            cloudAPI.init();
+
         }
     }
 
@@ -229,31 +249,34 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     private void selectRoute(int groupPosition) {
+        selectedRoutePosition = groupPosition;
+
         mMap.clear();
 
         RouteView rv = (RouteView)adapter.getGroup(groupPosition);
         Route route = db.routeDao().findByName(rv.name);
-        List<Landmark> landmarks = db.landmarkRouteDao().findLandmarksForRouteId(route.uid);
+        currentLandmarks = db.landmarkRouteDao().findLandmarksForRouteId(route.uid);
 
         TextView tv = (TextView)findViewById(R.id.statusView);
         tv.setText(rv.name);
 
-        downloadDirections(route, landmarks, groupPosition, true);
-        List<MarkerOptions> markerOpts = drawMarkers(landmarks);
+        downloadDirections(route, groupPosition, true);
+        List<MarkerOptions> markerOpts = drawMarkers();
         centerRouteOnMap(markerOpts);
     }
 
-    private List<MarkerOptions> drawMarkers(List<Landmark> landmarks) {
+    private List<MarkerOptions> drawMarkers() {
         List<MarkerOptions> markersOpts = new ArrayList<>();
         currentMarkers = new ArrayList<>();
 
-        for (Landmark landmark : landmarks) {
+        for (Landmark landmark : currentLandmarks) {
             LatLng point = new LatLng(landmark.latitude, landmark.longitude);
 
             markersOpts.add(new MarkerOptions()
                     .position(point)
                     .title(landmark.name)
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                    .icon(BitmapDescriptorFactory.defaultMarker(
+                            landmark.visited ? BitmapDescriptorFactory.HUE_YELLOW : BitmapDescriptorFactory.HUE_AZURE)));
 
             Marker marker = mMap.addMarker(markersOpts.get(markersOpts.size() - 1));
             currentMarkers.add(marker);
@@ -286,7 +309,7 @@ public class MapsActivity extends FragmentActivity implements
         for(int i = 0; i < routes.size(); i++) {
             List<Landmark> landmarks = db.landmarkRouteDao().findLandmarksForRouteId(routes.get(i).uid);
 
-            downloadDirections(routes.get(i), landmarks, i, false);
+            downloadDirections(routes.get(i), i, false);
         }
     }
 
@@ -296,12 +319,12 @@ public class MapsActivity extends FragmentActivity implements
         elv.deferNotifyDataSetChanged();
     }
 
-    private void downloadDirections(final Route route, List<Landmark> landmarks, final int groupPosition, final boolean draw) {
-        if (landmarks.size() < 2) {
+    private void downloadDirections(final Route route, final int groupPosition, final boolean draw) {
+        if (currentLandmarks.size() < 2) {
             throw new IllegalArgumentException();
         }
 
-        Coordinate2String c2s = new Coordinate2String(landmarks);
+        Coordinate2String c2s = new Coordinate2String(currentLandmarks);
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")
@@ -333,7 +356,7 @@ public class MapsActivity extends FragmentActivity implements
                         updateEVL(groupPosition);
 
                         if(draw) {
-                            ParserTask parserTask = new ParserTask(mMap);
+                            ParserTask parserTask = new ParserTask(MapsActivity.this);
                             parserTask.execute(response.toString());
                         }
                     }
@@ -363,5 +386,35 @@ public class MapsActivity extends FragmentActivity implements
 
         RequestQueue queue = Volley.newRequestQueue(this);
         queue.add(jsObjRequest);
+    }
+
+    @Override
+    public void photoRecognized(List<Landmark> results) {
+
+        for(Landmark currLandmark : currentLandmarks) {
+            for(Landmark result : results) {
+                if(currLandmark.cloudLabel.equals(result.cloudLabel)) {
+                    db.landmarkDao().setVisitedById(currLandmark.uid, true);
+                }
+            }
+        }
+
+        refreshMap(results);
+    }
+
+    private void refreshMap(List<Landmark> results) {
+        mMap.clear();
+
+        RouteView rv = (RouteView)adapter.getGroup(selectedRoutePosition);
+        currentLandmarks = db.landmarkRouteDao().findLandmarksForRouteId(rv.uid);
+
+        mMap.addPolyline(directionsPO);
+        drawMarkers();
+    }
+
+    @Override
+    public void updateDirections(PolylineOptions po) {
+        directionsPO = po;
+        mMap.addPolyline(directionsPO);
     }
 }

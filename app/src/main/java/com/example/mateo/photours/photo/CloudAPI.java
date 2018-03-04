@@ -1,24 +1,19 @@
-package com.example.mateo.photours;
+package com.example.mateo.photours.photo;
 
+import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
-import android.os.Environment;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-
-import java.io.File;
-
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.mateo.photours.Global;
 import com.example.mateo.photours.database.entities.Landmark;
 import com.example.mateo.photours.util.PackageManagerUtils;
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -37,48 +32,49 @@ import com.google.api.services.vision.v1.model.Feature;
 import com.google.api.services.vision.v1.model.Image;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PhotoActivity extends AppCompatActivity {
+public class CloudAPI {
 
-    private static final String TAG = PhotoActivity.class.getSimpleName();
+    private final static String TAG = "CloudAPI";
 
     private Uri photoUri;
-    private TextView textView;
-    private ImageView imageView;
+    private Context context;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_photo);
+    private List<Landmark> results;
 
-        photoUri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", getCameraFile());
-        imageView = (ImageView)findViewById(R.id.imageView);
-        textView = (TextView)findViewById(R.id.textView);
+    private PhotoRecognitionListener listener;
 
-        textView.setText(R.string.detecting);
+    public CloudAPI(Context context, PhotoRecognitionListener listener) {
+        this.context = context;
+        this.listener = listener;
+    }
+
+    public void init() {
+        photoUri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", getCameraFile());
 
         if (photoUri != null) {
             try {
                 // scale the image to save on bandwidth
                 Bitmap bitmap =
                         scaleBitmapDown(
-                                MediaStore.Images.Media.getBitmap(getContentResolver(), photoUri),
+                                MediaStore.Images.Media.getBitmap(context.getContentResolver(), photoUri),
                                 1200);
 
                 callCloudVision(bitmap);
-                imageView.setImageBitmap(setImage(getCameraFile().getPath(), 1200, 1200));
-//                imageView.setImageBitmap(MediaStore.Images.Media.getBitmap(getContentResolver(), photoUri));
+//                imageView.setImageBitmap(setImage(getCameraFile().getPath(), 1200, 1200));
+                //                imageView.setImageBitmap(MediaStore.Images.Media.getBitmap(getContentResolver(), photoUri));
 
             } catch (IOException e) {
                 Log.d(TAG, "Image picking failed because " + e.getMessage());
-                Toast.makeText(this, "Error", Toast.LENGTH_LONG).show();
+                Toast.makeText(context, "Error", Toast.LENGTH_LONG).show();
             }
         } else {
             Log.d(TAG, "Image picker gave us a null image.");
-            Toast.makeText(this, "Error", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Error", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -174,10 +170,10 @@ public class PhotoActivity extends AppCompatActivity {
                                         throws IOException {
                                     super.initializeVisionRequest(visionRequest);
 
-                                    String packageName = getPackageName();
+                                    String packageName = context.getPackageName();
                                     visionRequest.getRequestHeaders().set(Global.ANDROID_PACKAGE_HEADER, packageName);
 
-                                    String sig = PackageManagerUtils.getSignature(getPackageManager(), packageName);
+                                    String sig = PackageManagerUtils.getSignature(context.getPackageManager(), packageName);
 
                                     visionRequest.getRequestHeaders().set(Global.ANDROID_CERT_HEADER, sig);
                                 }
@@ -236,7 +232,7 @@ public class PhotoActivity extends AppCompatActivity {
             }
 
             protected void onPostExecute(String result) {
-                textView.setText(result);
+                listener.photoRecognized(results);
             }
         }.execute();
     }
@@ -244,8 +240,8 @@ public class PhotoActivity extends AppCompatActivity {
     private String convertResponseToString(BatchAnnotateImagesResponse response) {
         String message = "";
 
-        List<EntityAnnotation> labels = response.getResponses().get(Global.CLOUD_NUMBER_OF_RESULTS).getLandmarkAnnotations();
-        List<Landmark> results = new ArrayList<>();
+        List<EntityAnnotation> labels = response.getResponses().get(0).getLandmarkAnnotations();
+        results = new ArrayList<>();
 
         if (labels != null) {
             for(int i = 0; i < labels.size(); i ++) {
@@ -265,12 +261,12 @@ public class PhotoActivity extends AppCompatActivity {
         return message;
     }
 
-    public File getCameraFile() {
-        File dir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+    private File getCameraFile() {
+        File dir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         return new File(dir, Global.FILE_NAME);
     }
 
-    public Bitmap scaleBitmapDown(Bitmap bitmap, int maxDimension) {
+    private Bitmap scaleBitmapDown(Bitmap bitmap, int maxDimension) {
 
         int originalWidth = bitmap.getWidth();
         int originalHeight = bitmap.getHeight();
@@ -288,5 +284,9 @@ public class PhotoActivity extends AppCompatActivity {
             resizedWidth = maxDimension;
         }
         return Bitmap.createScaledBitmap(bitmap, resizedWidth, resizedHeight, false);
+    }
+
+    public List<Landmark> getResults() {
+        return results;
     }
 }

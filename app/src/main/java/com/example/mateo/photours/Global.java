@@ -22,4 +22,6 @@ public class Global extends Application {
 
     public static final double MAP_ROUTE_FOCUS_BOTTOM_PADDING = 0.5;
     public static final double MAP_ROUTE_FOCUS_TOP_PADDING = 0.2;
+
+    public static final int CLOUD_NUMBER_OF_RESULTS = 5;
 }

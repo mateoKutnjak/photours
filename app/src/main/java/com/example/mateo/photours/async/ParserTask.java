@@ -4,7 +4,6 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 
 import com.example.mateo.photours.util.DirectionsJSONParser;
-import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -16,10 +15,10 @@ import java.util.List;
 
 public class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
 
-    private GoogleMap mMap;
+    private DirectionsListener listener;
 
-    public ParserTask(GoogleMap mMap){
-        this.mMap = mMap;
+    public ParserTask(DirectionsListener listener){
+        this.listener = listener;
     }
 
     @Override
@@ -70,7 +69,6 @@ public class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<Str
             lineOptions.color(Color.GRAY);
         }
 
-        // Drawing polyline in the Google Map for the i-th route
-        mMap.addPolyline(lineOptions);
+        listener.updateDirections(lineOptions);
     }
 }

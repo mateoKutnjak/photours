@@ -14,11 +14,17 @@ public class Landmark {
     @ColumnInfo(name = "name")
     public String name;
 
+    @ColumnInfo(name = "cloudLabel")
+    public String cloudLabel;
+
     @ColumnInfo(name = "latitude")
     public double latitude;
 
     @ColumnInfo(name = "longitude")
     public double longitude;
+
+    @ColumnInfo(name = "visited")
+    public boolean visited;
 
     @ColumnInfo(name = "message")
     public String message;

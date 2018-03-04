@@ -18,10 +18,11 @@ public class DatabaseInitializer {
         populateWithInitData(db);
     }
 
-    private static long addLandmark(final AppDatabase db, final String name, final double latitude, final double longitude, final String message) {
+    private static long addLandmark(final AppDatabase db, final String name, final String cloudLabel, final double latitude, final double longitude, final String message) {
         Landmark landmark = new Landmark();
 
         landmark.name = name;
+        landmark.cloudLabel = cloudLabel;
         landmark.latitude = latitude;
         landmark.longitude = longitude;
         landmark.message = message;
@@ -52,10 +53,10 @@ public class DatabaseInitializer {
         db.routeDao().clear();
         db.landmarkRouteDao().clear();
 
-        long landmarkId_zagrebCathedral = addLandmark(db, "Zagreb cathedral", 45.814548, 15.979477, "1000 years old");
-        long landmarkId_croatianNationalTheatre = addLandmark(db, "Croatian national theater", 45.809664, 15.969938, "Coming here with hobos");
-        long landmarkId_lotrscakTower = addLandmark(db, "Lotrscak tower", 45.814626, 15.973275, "bum bum");
-        long landmarkId_banJelacicMonument = addLandmark(db, "Ban Jelacic monument", 45.813174, 15.977312, "Nademo se kod konja");
+        long landmarkId_zagrebCathedral = addLandmark(db, "Zagreb cathedral", "Zagreb Cathedral",45.814548, 15.979477, "1000 years old");
+        long landmarkId_croatianNationalTheatre = addLandmark(db, "Croatian national theater", "", 45.809664, 15.969938, "Coming here with hobos");
+        long landmarkId_lotrscakTower = addLandmark(db, "Lotrscak tower", "",45.814626, 15.973275, "bum bum");
+        long landmarkId_banJelacicMonument = addLandmark(db, "Ban Jelacic monument", "", 45.813174, 15.977312, "Nademo se kod konja");
 
         long routeId_famousLandmarks = addRoute(db, "Famous landmarks", 0.0);
         long routeId_interestingLandmarks = addRoute(db, "Interesting landmarks", 0.0);
