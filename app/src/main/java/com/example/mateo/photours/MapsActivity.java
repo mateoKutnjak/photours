@@ -76,7 +76,7 @@ public class MapsActivity extends FragmentActivity implements
     private List<Landmark> currentLandmarks;
     private List<Marker> currentMarkers;
     private PolylineOptions directionsPO;
-    private int selectedRoutePosition;
+    private int currentGroupPosition;
 
     private ExpandableListView elv;
     private ELVAdapter adapter;
@@ -249,7 +249,7 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     private void selectRoute(int groupPosition) {
-        selectedRoutePosition = groupPosition;
+        currentGroupPosition = groupPosition;
 
         mMap.clear();
 
@@ -309,7 +309,7 @@ public class MapsActivity extends FragmentActivity implements
         for(int i = 0; i < routes.size(); i++) {
             List<Landmark> landmarks = db.landmarkRouteDao().findLandmarksForRouteId(routes.get(i).uid);
 
-            downloadDirections(routes.get(i), i, false);
+            downloadDirections(routes.get(i), i,false);
         }
     }
 
@@ -320,11 +320,18 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     private void downloadDirections(final Route route, final int groupPosition, final boolean draw) {
-        if (currentLandmarks.size() < 2) {
+        List<Landmark> landmarks;
+        if(groupPosition != currentGroupPosition) {
+            landmarks = db.landmarkRouteDao().findLandmarksForRouteId(route.uid);
+        } else {
+            landmarks = currentLandmarks;
+        }
+
+        if (landmarks.size() < 2) {
             throw new IllegalArgumentException();
         }
 
-        Coordinate2String c2s = new Coordinate2String(currentLandmarks);
+        Coordinate2String c2s = new Coordinate2String(landmarks);
 
         Uri.Builder builder = new Uri.Builder();
         builder.scheme("https")
@@ -399,13 +406,13 @@ public class MapsActivity extends FragmentActivity implements
             }
         }
 
-        refreshMap(results);
+        refreshMap();
     }
 
-    private void refreshMap(List<Landmark> results) {
+    private void refreshMap() {
         mMap.clear();
 
-        RouteView rv = (RouteView)adapter.getGroup(selectedRoutePosition);
+        RouteView rv = (RouteView)adapter.getGroup(currentGroupPosition);
         currentLandmarks = db.landmarkRouteDao().findLandmarksForRouteId(rv.uid);
 
         mMap.addPolyline(directionsPO);
