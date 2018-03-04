@@ -18,6 +18,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.widget.ExpandableListView;
+import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -42,6 +43,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
@@ -128,7 +130,7 @@ public class MapsActivity extends FragmentActivity implements
         elv.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
-                drawRoute(groupPosition);
+                selectRoute(groupPosition);
                 return false;
             }
         });
@@ -206,7 +208,7 @@ public class MapsActivity extends FragmentActivity implements
         }
 
         styleMap(R.raw.map_style_aubergine_labels);
-        drawRoute(Global.ZERO);
+        selectRoute(Global.ZERO);
 
         downloadAllDirections();
         elv.deferNotifyDataSetChanged();
@@ -226,12 +228,15 @@ public class MapsActivity extends FragmentActivity implements
         }
     }
 
-    private void drawRoute(int groupPosition) {
+    private void selectRoute(int groupPosition) {
         mMap.clear();
 
         RouteView rv = (RouteView)adapter.getGroup(groupPosition);
         Route route = db.routeDao().findByName(rv.name);
         List<Landmark> landmarks = db.landmarkRouteDao().findLandmarksForRouteId(route.uid);
+
+        TextView tv = (TextView)findViewById(R.id.statusView);
+        tv.setText(rv.name);
 
         downloadDirections(route, landmarks, groupPosition, true);
         List<MarkerOptions> markerOpts = drawMarkers(landmarks);
@@ -267,7 +272,11 @@ public class MapsActivity extends FragmentActivity implements
         int height = getResources().getDisplayMetrics().heightPixels;
         int padding = (int) (width * 0.1);
 
-        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding);
+        LatLng newSoutheast = new LatLng(bounds.southwest.latitude - (bounds.northeast.latitude - bounds.southwest.latitude) * Global.MAP_ROUTE_FOCUS_BOTTOM_PADDING, bounds.southwest.longitude);
+        LatLng newNorthEast = new LatLng(bounds.northeast.latitude + (bounds.northeast.latitude - bounds.southwest.latitude) * Global.MAP_ROUTE_FOCUS_TOP_PADDING, bounds.northeast.longitude);
+        LatLngBounds bounds2 = new LatLngBounds(newSoutheast, newNorthEast);
+
+        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds2, width, height, padding);
         mMap.animateCamera(cu);
     }
 
