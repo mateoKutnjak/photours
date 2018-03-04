@@ -30,4 +30,7 @@ public interface LandmarkRouteDao {
 
     @Query("SELECT l.* FROM landmarkroute lr LEFT OUTER JOIN landmark l ON lr.landmarkId = l.uid WHERE lr.routeId = :routeId")
     List<Landmark> findLandmarksForRouteId(long routeId);
+
+    @Query("SELECT l.name FROM landmarkroute lr LEFT OUTER JOIN landmark l ON lr.landmarkId = l.uid WHERE lr.routeId = :routeId")
+    List<String> findLandmarkNamesForRouteId(long routeId);
 }

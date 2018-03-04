@@ -20,8 +20,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.widget.ExpandableListView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -46,7 +44,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
@@ -69,6 +66,7 @@ public class MapsActivity extends FragmentActivity implements
     private AppDatabase db;
 
     private GoogleMap mMap;
+
     private ExpandableListView elv;
     private ELVAdapter adapter;
     private List<RouteView> listCategories;
@@ -81,12 +79,18 @@ public class MapsActivity extends FragmentActivity implements
 
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Global.REQUEST_LOCATION);
 
-        db = AppDatabase.getAppDatabase(getApplicationContext());
-        DatabaseInitializer.populateSync(db);
+        initDatabase();
 
-        fillRouteList();
+        initELV();
+        fillELV();
+
         addFloatingActionButton();
         addMapFragment();
+    }
+
+    private void initDatabase() {
+        db = AppDatabase.getAppDatabase(getApplicationContext());
+        DatabaseInitializer.populateSync(db);
     }
 
     private void addMapFragment() {
@@ -105,22 +109,17 @@ public class MapsActivity extends FragmentActivity implements
         });
     }
 
-    private void fillRouteList() {
+    private void initELV() {
         elv = (ExpandableListView) findViewById(R.id.expList);
-        listCategories = new ArrayList<>();
-        childMap = new HashMap<>();
-
-        List<Route> routes = db.routeDao().getAll();
         listCategories = db.routeDao().getAllWithoutSteps();
+        childMap = new HashMap<>();
+    }
 
-        for(int i = 0; i < routes.size(); i++) {
-            List<Landmark> landmarks = db.landmarkRouteDao().findLandmarksForRouteId(routes.get(i).uid);
-            List<String> landmarkNames = new ArrayList<>();
+    private void fillELV() {
+        List<Route> routes = db.routeDao().getAll();
 
-            for(Landmark landmark : landmarks) {
-                landmarkNames.add(landmark.name);
-            }
-
+        for (int i = 0; i < routes.size(); i++) {
+            List<String> landmarkNames = db.landmarkRouteDao().findLandmarkNamesForRouteId(routes.get(i).uid);
             childMap.put(listCategories.get(i), landmarkNames);
         }
 
@@ -130,7 +129,7 @@ public class MapsActivity extends FragmentActivity implements
         elv.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
-                drawRoute((RouteView)adapter.getGroup(groupPosition));
+                drawRoute(groupPosition);
                 return false;
             }
         });
@@ -138,7 +137,7 @@ public class MapsActivity extends FragmentActivity implements
         elv.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-                Landmark landmark = db.landmarkDao().findByName((String)adapter.getChild(groupPosition, childPosition));
+                Landmark landmark = db.landmarkDao().findByName((String) adapter.getChild(groupPosition, childPosition));
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(landmark.latitude, landmark.longitude)));
                 return false;
             }
@@ -203,14 +202,17 @@ public class MapsActivity extends FragmentActivity implements
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
-        } else {
-            Toast.makeText(MapsActivity.this, "You have to accept to enjoy all app's services!", Toast.LENGTH_LONG).show();
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED) {
-                mMap.setMyLocationEnabled(true);
-            }
         }
 
+        styleMap(R.raw.map_style_aubergine_labels);
+        drawRoute(Global.ZERO);
+
+//        for(int i = 0; i < adapter.getGroupCount(); i++) {
+//            downloadDirections();
+//        }
+    }
+
+    private void styleMap(int map_style) {
         try {
             boolean success = mMap.setMapStyle(
                     MapStyleOptions.loadRawResourceStyle(
@@ -222,21 +224,24 @@ public class MapsActivity extends FragmentActivity implements
         } catch (Resources.NotFoundException e) {
             Log.e(TAG, "Can't find style.", e);
         }
-
-        drawRoute((RouteView)adapter.getGroup(Global.ZERO));
     }
 
-    public void drawRoute(RouteView rv) {
+    private void drawRoute(int groupPosition) {
         mMap.clear();
 
+        RouteView rv = (RouteView)adapter.getGroup(groupPosition);
         Route route = db.routeDao().findByName(rv.name);
         List<Landmark> landmarks = db.landmarkRouteDao().findLandmarksForRouteId(route.uid);
 
         downloadDirections(route, landmarks);
+        List<MarkerOptions> markers = drawMarkers(landmarks);
+        centerRouteOnMap(markers);
+    }
 
+    private List<MarkerOptions> drawMarkers(List<Landmark> landmarks) {
         List<MarkerOptions> markers = new ArrayList<>();
 
-        for(Landmark landmark : landmarks) {
+        for (Landmark landmark : landmarks) {
             LatLng point = new LatLng(landmark.latitude, landmark.longitude);
 
             markers.add(new MarkerOptions()
@@ -244,9 +249,12 @@ public class MapsActivity extends FragmentActivity implements
                     .title(landmark.name)
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
 
-            mMap.addMarker(markers.get(markers.size()-1));
+            mMap.addMarker(markers.get(markers.size() - 1));
         }
+        return markers;
+    }
 
+    private void centerRouteOnMap(List<MarkerOptions> markers) {
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
         for (MarkerOptions marker : markers) {
             builder.include(marker.getPosition());
@@ -255,14 +263,14 @@ public class MapsActivity extends FragmentActivity implements
 
         int width = getResources().getDisplayMetrics().widthPixels;
         int height = getResources().getDisplayMetrics().heightPixels;
-        int padding = (int)(width * 0.1);
+        int padding = (int) (width * 0.1);
 
         CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding);
         mMap.animateCamera(cu);
     }
 
     private void downloadDirections(final Route route, List<Landmark> landmarks) {
-        if(landmarks.size() < 2) {
+        if (landmarks.size() < 2) {
             throw new IllegalArgumentException();
         }
 
@@ -292,7 +300,7 @@ public class MapsActivity extends FragmentActivity implements
                         Log.d(TAG, response.toString());
 
                         Pair<Integer, Integer> disDur = JSONParser.getDistanceDurationFromDirections(response);
-                        db.routeDao().updateDistance(route.uid, (double)disDur.first / 1000);
+                        db.routeDao().updateDistance(route.uid, (double) disDur.first / 1000);
                         db.routeDao().updateDuration(route.uid, disDur.second);
 
                         ParserTask parserTask = new ParserTask();
@@ -311,10 +319,11 @@ public class MapsActivity extends FragmentActivity implements
                 }) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
-                HashMap<String, String> headers = new HashMap<String,String>();
+                HashMap<String, String> headers = new HashMap<String, String>();
                 //headers.put("Content-Type", "application/json; charset=utf-8");
                 return headers;
             }
+
             @Override
             public String getBodyContentType() {
                 return "application/json";
@@ -325,7 +334,7 @@ public class MapsActivity extends FragmentActivity implements
         queue.add(jsObjRequest);
     }
 
-    private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String,String>>>> {
+    private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
 
         @Override
         protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
@@ -333,13 +342,13 @@ public class MapsActivity extends FragmentActivity implements
             JSONObject jObject;
             List<List<HashMap<String, String>>> routes = null;
 
-            try{
+            try {
                 jObject = new JSONObject(jsonData[0]);
                 DirectionsJSONParser parser = new DirectionsJSONParser();
 
                 // Starts parsing data
                 routes = parser.parse(jObject);
-            }catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             return routes;
@@ -349,10 +358,9 @@ public class MapsActivity extends FragmentActivity implements
         protected void onPostExecute(List<List<HashMap<String, String>>> result) {
             ArrayList<LatLng> points = null;
             PolylineOptions lineOptions = null;
-            MarkerOptions markerOptions = new MarkerOptions();
 
             // Traversing through all the routes
-            for(int i=0;i<result.size();i++){
+            for (int i = 0; i < result.size(); i++) {
                 points = new ArrayList<LatLng>();
                 lineOptions = new PolylineOptions();
 
@@ -360,8 +368,8 @@ public class MapsActivity extends FragmentActivity implements
                 List<HashMap<String, String>> path = result.get(i);
 
                 // Fetching all the points in i-th route
-                for(int j=0;j<path.size();j++){
-                    HashMap<String,String> point = path.get(j);
+                for (int j = 0; j < path.size(); j++) {
+                    HashMap<String, String> point = path.get(j);
 
                     double lat = Double.parseDouble(point.get("lat"));
                     double lng = Double.parseDouble(point.get("lng"));
