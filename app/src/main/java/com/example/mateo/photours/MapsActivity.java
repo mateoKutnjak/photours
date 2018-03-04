@@ -4,9 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -29,13 +27,13 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.mateo.photours.adapters.ELVAdapter;
+import com.example.mateo.photours.async.ParserTask;
 import com.example.mateo.photours.database.AppDatabase;
 import com.example.mateo.photours.database.DatabaseInitializer;
 import com.example.mateo.photours.database.entities.Landmark;
 import com.example.mateo.photours.database.entities.Route;
 import com.example.mateo.photours.database.views.RouteView;
 import com.example.mateo.photours.util.Coordinate2String;
-import com.example.mateo.photours.util.DirectionsJSONParser;
 import com.example.mateo.photours.util.JSONParser;
 import com.example.mateo.photours.util.PermissionUtils;
 import com.google.android.gms.maps.CameraUpdate;
@@ -48,7 +46,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONObject;
 
@@ -59,7 +56,7 @@ import java.util.List;
 import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements
-        OnMapReadyCallback {
+        OnMapReadyCallback{
 
     private static final String TAG = "MapsActivity";
 
@@ -207,9 +204,8 @@ public class MapsActivity extends FragmentActivity implements
         styleMap(R.raw.map_style_aubergine_labels);
         drawRoute(Global.ZERO);
 
-//        for(int i = 0; i < adapter.getGroupCount(); i++) {
-//            downloadDirections();
-//        }
+        downloadAllDirections();
+        elv.deferNotifyDataSetChanged();
     }
 
     private void styleMap(int map_style) {
@@ -233,7 +229,7 @@ public class MapsActivity extends FragmentActivity implements
         Route route = db.routeDao().findByName(rv.name);
         List<Landmark> landmarks = db.landmarkRouteDao().findLandmarksForRouteId(route.uid);
 
-        downloadDirections(route, landmarks);
+        downloadDirections(route, landmarks, groupPosition, true);
         List<MarkerOptions> markers = drawMarkers(landmarks);
         centerRouteOnMap(markers);
     }
@@ -269,7 +265,23 @@ public class MapsActivity extends FragmentActivity implements
         mMap.animateCamera(cu);
     }
 
-    private void downloadDirections(final Route route, List<Landmark> landmarks) {
+    private void downloadAllDirections() {
+        List<Route> routes = db.routeDao().getAll();
+
+        for(int i = 0; i < routes.size(); i++) {
+            List<Landmark> landmarks = db.landmarkRouteDao().findLandmarksForRouteId(routes.get(i).uid);
+
+            downloadDirections(routes.get(i), landmarks, i, false);
+        }
+    }
+
+    private void updateEVL(int groupPosition) {
+        listCategories.get(groupPosition).length = db.routeDao().findByName(((RouteView)adapter.getGroup(groupPosition)).name).length;
+        listCategories.get(groupPosition).duration = db.routeDao().findByName(((RouteView)adapter.getGroup(groupPosition)).name).duration;
+        elv.deferNotifyDataSetChanged();
+    }
+
+    private void downloadDirections(final Route route, List<Landmark> landmarks, final int groupPosition, final boolean draw) {
         if (landmarks.size() < 2) {
             throw new IllegalArgumentException();
         }
@@ -303,8 +315,12 @@ public class MapsActivity extends FragmentActivity implements
                         db.routeDao().updateDistance(route.uid, (double) disDur.first / 1000);
                         db.routeDao().updateDuration(route.uid, disDur.second);
 
-                        ParserTask parserTask = new ParserTask();
-                        parserTask.execute(response.toString());
+                        updateEVL(groupPosition);
+
+                        if(draw) {
+                            ParserTask parserTask = new ParserTask(mMap);
+                            parserTask.execute(response.toString());
+                        }
                     }
                 }, new Response.ErrorListener() {
 
@@ -332,60 +348,5 @@ public class MapsActivity extends FragmentActivity implements
 
         RequestQueue queue = Volley.newRequestQueue(this);
         queue.add(jsObjRequest);
-    }
-
-    private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
-
-        @Override
-        protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
-
-            JSONObject jObject;
-            List<List<HashMap<String, String>>> routes = null;
-
-            try {
-                jObject = new JSONObject(jsonData[0]);
-                DirectionsJSONParser parser = new DirectionsJSONParser();
-
-                // Starts parsing data
-                routes = parser.parse(jObject);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return routes;
-        }
-
-        @Override
-        protected void onPostExecute(List<List<HashMap<String, String>>> result) {
-            ArrayList<LatLng> points = null;
-            PolylineOptions lineOptions = null;
-
-            // Traversing through all the routes
-            for (int i = 0; i < result.size(); i++) {
-                points = new ArrayList<LatLng>();
-                lineOptions = new PolylineOptions();
-
-                // Fetching i-th route
-                List<HashMap<String, String>> path = result.get(i);
-
-                // Fetching all the points in i-th route
-                for (int j = 0; j < path.size(); j++) {
-                    HashMap<String, String> point = path.get(j);
-
-                    double lat = Double.parseDouble(point.get("lat"));
-                    double lng = Double.parseDouble(point.get("lng"));
-                    LatLng position = new LatLng(lat, lng);
-
-                    points.add(position);
-                }
-
-                // Adding all the points in the route to LineOptions
-                lineOptions.addAll(points);
-                lineOptions.width(15);
-                lineOptions.color(Color.GRAY);
-            }
-
-            // Drawing polyline in the Google Map for the i-th route
-            mMap.addPolyline(lineOptions);
-        }
     }
 }
