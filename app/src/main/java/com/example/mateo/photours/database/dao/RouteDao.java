@@ -48,5 +48,5 @@ public interface RouteDao {
     String getSteps(long uid);
 
     @Query("SELECT uid, name, length, duration FROM route")
-    List<RouteView> getAllWithoutSteps();
+    List<Route> getAllWithoutSteps();
 }

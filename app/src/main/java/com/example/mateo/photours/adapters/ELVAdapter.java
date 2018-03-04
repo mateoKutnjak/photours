@@ -7,10 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
-import com.example.mateo.photours.Global;
 import com.example.mateo.photours.R;
-import com.example.mateo.photours.database.entities.Landmark;
-import com.example.mateo.photours.database.entities.Route;
 import com.example.mateo.photours.database.views.RouteView;
 import com.example.mateo.photours.util.UnitsUtil;
 
@@ -27,6 +24,12 @@ public class ELVAdapter extends BaseExpandableListAdapter {
         this.listCategory = listCategory;
         this.childMap = childMap;
         this.context = context;
+    }
+
+    public void refresh(List<RouteView> listCategory, Map<RouteView, List<String>> childMap) {
+        this.listCategory = listCategory;
+        this.childMap = childMap;
+        notifyDataSetChanged();
     }
 
     @Override
@@ -69,16 +72,20 @@ public class ELVAdapter extends BaseExpandableListAdapter {
         String categoryTitle = ((RouteView)getGroup(groupPosition)).name;
         double distance = ((RouteView)getGroup(groupPosition)).length;
         int duration = ((RouteView)getGroup(groupPosition)).duration;
+        int visited = ((RouteView)getGroup(groupPosition)).visited;
+        int totalLandmarks = ((RouteView)getGroup(groupPosition)).totalLandmarks;
 
         convertView = LayoutInflater.from(context).inflate(R.layout.elv_group, null);
 
         TextView tvGroup = (TextView)convertView.findViewById(R.id.tvGroup);
         TextView tvGroupDistance = (TextView)convertView.findViewById(R.id.tvGroupDistance);
         TextView tvGroupDuration = (TextView)convertView.findViewById(R.id.tvGroupDuration);
+        TextView tvGroupVisited = (TextView)convertView.findViewById(R.id.tvGroupVisited);
 
         tvGroup.setText(categoryTitle);
         tvGroupDistance.setText(String.valueOf(distance));
         tvGroupDuration.setText(String.valueOf(UnitsUtil.seconds2HHmmss(duration)));
+        tvGroupVisited.setText(visited + "/" + totalLandmarks);
 
         return convertView;
     }

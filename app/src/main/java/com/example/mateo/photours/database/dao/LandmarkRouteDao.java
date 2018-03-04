@@ -16,8 +16,8 @@ public interface LandmarkRouteDao {
     @Query("SELECT * FROM landmarkroute")
     List<LandmarkRoute> getAll();
 
-    @Query("SELECT COUNT(*) from landmarkroute")
-    int count();
+    @Query("SELECT COUNT(*) from landmarkroute WHERE routeId = :routeId")
+    int countForRouteId(long routeId);
 
     @Insert
     long insert(LandmarkRoute landmarkRoute);
@@ -33,4 +33,7 @@ public interface LandmarkRouteDao {
 
     @Query("SELECT l.name FROM landmarkroute lr LEFT OUTER JOIN landmark l ON lr.landmarkId = l.uid WHERE lr.routeId = :routeId")
     List<String> findLandmarkNamesForRouteId(long routeId);
+
+    @Query("SELECT COUNT(*) FROM landmarkroute lr LEFT OUTER JOIN landmark l ON lr.landmarkId = l.uid WHERE lr.routeId = :routeId AND l.visited=:visited")
+    int countVisitedLandmarksForRouteId(long routeId, boolean visited);
 }

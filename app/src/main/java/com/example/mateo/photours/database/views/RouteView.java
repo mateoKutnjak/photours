@@ -18,4 +18,10 @@ public class RouteView {
 
     @ColumnInfo(name = "duration")
     public int duration;
+
+    @ColumnInfo(name = "visited")
+    public int visited;
+
+    @ColumnInfo(name = "totalLandmarks")
+    public int totalLandmarks;
 }

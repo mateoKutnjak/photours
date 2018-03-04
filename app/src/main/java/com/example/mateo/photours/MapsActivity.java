@@ -144,21 +144,26 @@ public class MapsActivity extends FragmentActivity implements
 
                 cl.setVisibility(CoordinatorLayout.INVISIBLE);
                 ll.setVisibility(LinearLayout.INVISIBLE);
-
-//                ImageView iv = (ImageView)findViewById(R.id.imageView);
-//                TextView tv = (TextView)findViewById(R.id.infoTextView);
-//                FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabClose);
-//
-//                iv.setVisibility(ImageView.INVISIBLE);
-//                tv.setVisibility(TextView.INVISIBLE);
-//                fab.setVisibility(FloatingActionButton.INVISIBLE);
             }
         });
     }
 
     private void initELV() {
         elv = (ExpandableListView) findViewById(R.id.expList);
-        listCategories = db.routeDao().getAllWithoutSteps();
+        List<Route> routes = db.routeDao().getAllWithoutSteps();
+        listCategories = new ArrayList<>();
+
+        for(int i = 0; i < routes.size(); i++) {
+            RouteView rv = new RouteView();
+            rv.uid = routes.get(i).uid;
+            rv.name = routes.get(i).name;
+            rv.length = routes.get(i).length;
+            rv.duration = routes.get(i).duration;
+            rv.visited = db.landmarkRouteDao().countVisitedLandmarksForRouteId(rv.uid, true);
+            rv.totalLandmarks = db.landmarkRouteDao().countForRouteId(rv.uid);
+
+            listCategories.add(rv);
+        }
         childMap = new HashMap<>();
     }
 
@@ -340,8 +345,12 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     private void updateEVL(int groupPosition) {
-        listCategories.get(groupPosition).length = db.routeDao().findByName(((RouteView)adapter.getGroup(groupPosition)).name).length;
-        listCategories.get(groupPosition).duration = db.routeDao().findByName(((RouteView)adapter.getGroup(groupPosition)).name).duration;
+        RouteView rv = (RouteView)adapter.getGroup(groupPosition);
+
+        listCategories.get(groupPosition).length = db.routeDao().findByName(rv.name).length;
+        listCategories.get(groupPosition).duration = db.routeDao().findByName(rv.name).duration;
+        listCategories.get(groupPosition).visited = db.landmarkRouteDao().countVisitedLandmarksForRouteId(rv.uid, true);
+        listCategories.get(groupPosition).totalLandmarks = db.landmarkRouteDao().countForRouteId(rv.uid);
         elv.deferNotifyDataSetChanged();
     }
 
@@ -386,7 +395,7 @@ public class MapsActivity extends FragmentActivity implements
                         db.routeDao().updateDistance(route.uid, (double) disDur.first / 1000);
                         db.routeDao().updateDuration(route.uid, disDur.second);
 
-                        updateEVL(groupPosition);
+                        updateEVL(groupPosition); // parameter disdur better
 
                         if(draw) {
                             ParserTask parserTask = new ParserTask(MapsActivity.this);
@@ -433,15 +442,14 @@ public class MapsActivity extends FragmentActivity implements
             }
         }
 
+        refreshListCategories();
+        adapter.refresh(listCategories, childMap);
         refreshMap();
     }
 
     private void createPopup(Landmark currLandmark) {
         CoordinatorLayout cl = (CoordinatorLayout)findViewById(R.id.infoCoordLayout);
         LinearLayout ll = (LinearLayout)findViewById(R.id.infoLinLayout);
-
-//        CoordinatorLayout mainCl = (CoordinatorLayout)findViewById(R.id.mainCoordLayout);
-//        LinearLayout mainLl = (LinearLayout)findViewById(R.id.mainLinLayout);
 
         ImageView iv = (ImageView)findViewById(R.id.infoImageView);
         TextView tv = (TextView)findViewById(R.id.infoTextView);
@@ -465,6 +473,28 @@ public class MapsActivity extends FragmentActivity implements
 
         mMap.addPolyline(directionsPO);
         drawMarkers();
+    }
+
+    private void refreshListCategories() {
+        List<Route> routes = db.routeDao().getAllWithoutSteps();
+        listCategories = new ArrayList<>();
+
+        for(int i = 0; i < routes.size(); i++) {
+            RouteView rv = new RouteView();
+            rv.uid = routes.get(i).uid;
+            rv.name = routes.get(i).name;
+            rv.length = routes.get(i).length;
+            rv.duration = routes.get(i).duration;
+            rv.visited = db.landmarkRouteDao().countVisitedLandmarksForRouteId(rv.uid, true);
+            rv.totalLandmarks = db.landmarkRouteDao().countForRouteId(rv.uid);
+
+            listCategories.add(rv);
+        }
+
+        for (int i = 0; i < routes.size(); i++) {
+            List<String> landmarkNames = db.landmarkRouteDao().findLandmarkNamesForRouteId(routes.get(i).uid);
+            childMap.put(listCategories.get(i), landmarkNames);
+        }
     }
 
     @Override
