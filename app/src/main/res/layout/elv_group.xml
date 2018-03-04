@@ -27,7 +27,6 @@
             android:layout_height="match_parent"
             android:id="@+id/tvGroupDistance"
             android:gravity="end"
-            android:background="@color/colorPrimary"
             android:textColor="@color/colorPrimaryDark"
             android:padding="5dp"
             android:layout_weight="0.5"/>
@@ -37,7 +36,6 @@
             android:layout_height="match_parent"
             android:id="@+id/tvGroupDuration"
             android:gravity="end"
-            android:background="@color/colorAccent"
             android:textColor="@color/colorPrimaryDark"
             android:padding="5dp"
             android:layout_weight="0.5"/>

@@ -31,7 +31,8 @@
                 android:id="@+id/textView"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="2"/>
+                android:layout_weight="2"
+                android:layout_margin="25dp"/>
 
             <ExpandableListView
                 android:id="@+id/expList"
@@ -52,8 +53,10 @@
             android:background="@drawable/fab"
             android:src="@android:drawable/ic_menu_camera"
             app:backgroundTint="@color/colorSilver"
-            app:layout_anchor="@id/expList"
-            app:layout_anchorGravity="top|right" />
+            app:layout_anchor="@id/textView"
+            app:layout_anchorGravity="bottom|right"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"/>
 
     </android.support.design.widget.CoordinatorLayout>
 

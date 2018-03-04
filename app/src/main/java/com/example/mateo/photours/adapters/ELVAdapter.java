@@ -7,10 +7,12 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
+import com.example.mateo.photours.Global;
 import com.example.mateo.photours.R;
 import com.example.mateo.photours.database.entities.Landmark;
 import com.example.mateo.photours.database.entities.Route;
 import com.example.mateo.photours.database.views.RouteView;
+import com.example.mateo.photours.util.UnitsUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -75,17 +77,8 @@ public class ELVAdapter extends BaseExpandableListAdapter {
         TextView tvGroupDuration = (TextView)convertView.findViewById(R.id.tvGroupDuration);
 
         tvGroup.setText(categoryTitle);
-
-        if(distance >= 0) {
-            tvGroupDistance.setText(String.valueOf(distance));
-        } else {
-            tvGroupDistance.setText("");
-        }
-        if(duration >= 0) {
-            tvGroupDuration.setText(String.valueOf(duration));
-        } else {
-            tvGroupDuration.setText("");
-        }
+        tvGroupDistance.setText(String.valueOf(distance));
+        tvGroupDuration.setText(String.valueOf(UnitsUtil.seconds2HHmmss(duration)));
 
         return convertView;
     }

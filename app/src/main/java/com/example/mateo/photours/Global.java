@@ -1,13 +1,6 @@
 package com.example.mateo.photours;
 
 import android.app.Application;
-import android.os.Environment;
-
-import java.io.File;
-
-/**
- * Created by mateo on 25/02/2018.
- */
 
 public class Global extends Application {
 

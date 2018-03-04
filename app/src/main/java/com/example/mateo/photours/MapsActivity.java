@@ -45,6 +45,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONObject;
@@ -63,6 +64,7 @@ public class MapsActivity extends FragmentActivity implements
     private AppDatabase db;
 
     private GoogleMap mMap;
+    private List<Marker> currentMarkers;
 
     private ExpandableListView elv;
     private ELVAdapter adapter;
@@ -136,6 +138,8 @@ public class MapsActivity extends FragmentActivity implements
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
                 Landmark landmark = db.landmarkDao().findByName((String) adapter.getChild(groupPosition, childPosition));
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(landmark.latitude, landmark.longitude)));
+
+                currentMarkers.get(childPosition).showInfoWindow();
                 return false;
             }
         });
@@ -230,24 +234,26 @@ public class MapsActivity extends FragmentActivity implements
         List<Landmark> landmarks = db.landmarkRouteDao().findLandmarksForRouteId(route.uid);
 
         downloadDirections(route, landmarks, groupPosition, true);
-        List<MarkerOptions> markers = drawMarkers(landmarks);
-        centerRouteOnMap(markers);
+        List<MarkerOptions> markerOpts = drawMarkers(landmarks);
+        centerRouteOnMap(markerOpts);
     }
 
     private List<MarkerOptions> drawMarkers(List<Landmark> landmarks) {
-        List<MarkerOptions> markers = new ArrayList<>();
+        List<MarkerOptions> markersOpts = new ArrayList<>();
+        currentMarkers = new ArrayList<>();
 
         for (Landmark landmark : landmarks) {
             LatLng point = new LatLng(landmark.latitude, landmark.longitude);
 
-            markers.add(new MarkerOptions()
+            markersOpts.add(new MarkerOptions()
                     .position(point)
                     .title(landmark.name)
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
 
-            mMap.addMarker(markers.get(markers.size() - 1));
+            Marker marker = mMap.addMarker(markersOpts.get(markersOpts.size() - 1));
+            currentMarkers.add(marker);
         }
-        return markers;
+        return markersOpts;
     }
 
     private void centerRouteOnMap(List<MarkerOptions> markers) {

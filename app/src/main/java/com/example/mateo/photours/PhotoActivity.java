@@ -245,7 +245,7 @@ public class PhotoActivity extends AppCompatActivity {
 
         List<EntityAnnotation> labels = response.getResponses().get(0).getLandmarkAnnotations();
         if (labels != null) {
-            for(int i = 0; i < 5; i ++) {
+            for(int i = 0; i < labels.size(); i ++) {
                 message += String.format("%s\n", labels.get(i).getDescription());
             }
         } else {
