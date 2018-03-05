@@ -7,6 +7,7 @@ import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.CountDownTimer;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
@@ -46,6 +47,7 @@ public class CloudAPI {
     private List<Landmark> results;
     private PhotoRecognitionListener listener;
     private Bitmap photoBitmap;
+    private int errorCode;
 
     public CloudAPI(Context context, PhotoRecognitionListener listener) {
         this.context = context;
@@ -153,6 +155,9 @@ public class CloudAPI {
 
         // Do the real work in an async task, because we need to use the network anyway
         new AsyncTask<Object, Void, String>() {
+
+            AsyncTask at = this;
+
             @Override
             protected String doInBackground(Object... params) {
                 try {
@@ -220,6 +225,8 @@ public class CloudAPI {
                     Log.d(TAG, "created Cloud Vision request object, sending request");
 
                     BatchAnnotateImagesResponse response = annotateRequest.execute();
+
+                    errorCode = Global.ERROR_NO_ERROR;
                     return convertResponseToString(response);
 
                 } catch (GoogleJsonResponseException e) {
@@ -228,11 +235,40 @@ public class CloudAPI {
                     Log.d(TAG, "failed to make API request because of other IOException " +
                             e.getMessage());
                 }
+                errorCode = Global.ERROR_API_REQUEST;
                 return "Cloud Vision API request failed. Check logs for details.";
             }
 
+            @Override
+            protected void onPreExecute() {
+                new CountDownTimer(10000, 10000) {
+                    public void onTick(long millisUntilFinished) {
+                        // You can monitor the progress here as well by changing the onTick() time
+                    }
+
+                    public void onFinish() {
+                        // stop async task if not in progress
+                        if (at.getStatus() == AsyncTask.Status.RUNNING) {
+                            at.cancel(false);
+                        }
+                    }
+                }.start();
+            }
+
             protected void onPostExecute(String result) {
-                listener.photoRecognized(results);
+                Log.d(TAG, "Response:" + result);
+
+                if(result.equals(Global.RESPONSE_NOT_RECOGNIZED)) {
+                    errorCode = Global.ERROR_LANDMARK_NOT_RECOGNIZED;
+                }
+                listener.photoRecognized(results, errorCode);
+            }
+
+            @Override
+            protected void onCancelled(String response) {
+                errorCode = Global.ERROR_TIMEOUT_EXPIRED;
+                listener.photoRecognized(null, errorCode);
+                Log.d(TAG, "Response cancelled:" + response);
             }
         }.execute();
     }
