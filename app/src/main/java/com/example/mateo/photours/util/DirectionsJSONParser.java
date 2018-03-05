@@ -12,10 +12,30 @@ import java.util.List;
 
 public class DirectionsJSONParser {
 
+    private int totalDistance;
+    private int totalDuration;
+    private List<List<HashMap<String, String>>> routes;
 
-    public List<List<HashMap<String,String>>> parse(JSONObject jObject){
+    public DirectionsJSONParser() {
+        this.totalDistance = 0;
+        this.totalDuration = 0;
+    }
 
-        List<List<HashMap<String, String>>> routes = new ArrayList<>() ;
+    public int getTotalDistance() {
+        return totalDistance;
+    }
+
+    public int getTotalDuration() {
+        return totalDuration;
+    }
+
+    public List<List<HashMap<String, String>>> getRoutes() {
+        return routes;
+    }
+
+    public void parse(JSONObject jObject){
+
+        routes = new ArrayList<>() ;
         JSONArray jRoutes = null;
         JSONArray jLegs = null;
         JSONArray jSteps = null;
@@ -39,6 +59,8 @@ public class DirectionsJSONParser {
                         polyline = (String)((JSONObject)((JSONObject)jSteps.get(k)).get("polyline")).get("points");
                         List<LatLng> list = decodePoly(polyline);
 
+                        totalDistance =+ (int)((JSONObject)((JSONObject)jSteps.get(k)).get("distance")).get("value");
+                        totalDuration =+ (int)((JSONObject)((JSONObject)jSteps.get(k)).get("duration")).get("value");
 
                         for(int l=0;l<list.size();l++){
                             HashMap<String, String> hm = new HashMap<String, String>();
@@ -55,7 +77,7 @@ public class DirectionsJSONParser {
             e.printStackTrace();
         }catch (Exception e){
         }
-        return routes;
+        return;
     }
 
     private List<LatLng> decodePoly(String encoded) {

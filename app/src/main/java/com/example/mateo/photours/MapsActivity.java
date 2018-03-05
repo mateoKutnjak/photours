@@ -1,13 +1,12 @@
 package com.example.mateo.photours;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -15,17 +14,13 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.FileProvider;
 import android.util.Log;
-import android.util.Pair;
 import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.akexorcist.googledirection.model.Line;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -43,9 +38,10 @@ import com.example.mateo.photours.database.entities.Route;
 import com.example.mateo.photours.database.views.RouteView;
 import com.example.mateo.photours.photo.CloudAPI;
 import com.example.mateo.photours.photo.PhotoRecognitionListener;
+import com.example.mateo.photours.util.CameraUtil;
 import com.example.mateo.photours.util.Coordinate2String;
-import com.example.mateo.photours.util.JSONParser;
 import com.example.mateo.photours.util.PermissionUtils;
+import com.example.mateo.photours.util.StepsParser;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -61,7 +57,6 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONObject;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -82,6 +77,7 @@ public class MapsActivity extends FragmentActivity implements
     private List<Marker> currentMarkers;
     private PolylineOptions directionsPO;
     private int currentGroupPosition;
+    private RouteView currentRV;
 
     private ExpandableListView elv;
     private ELVAdapter adapter;
@@ -116,36 +112,6 @@ public class MapsActivity extends FragmentActivity implements
     private void initDatabase() {
         db = AppDatabase.getAppDatabase(getApplicationContext());
         DatabaseInitializer.populateSync(db);
-    }
-
-    private void addMapFragment() {
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-    }
-
-    private void addCameraFAB() {
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startCamera();
-            }
-        });
-    }
-
-    private void addInfoFAB() {
-        FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabClose);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                CoordinatorLayout cl = (CoordinatorLayout)findViewById(R.id.infoCoordLayout);
-                LinearLayout ll = (LinearLayout)findViewById(R.id.infoLinLayout);
-
-                cl.setVisibility(CoordinatorLayout.INVISIBLE);
-                ll.setVisibility(LinearLayout.INVISIBLE);
-            }
-        });
     }
 
     private void initELV() {
@@ -198,23 +164,39 @@ public class MapsActivity extends FragmentActivity implements
         });
     }
 
-    public void startCamera() {
-        if (PermissionUtils.requestPermission(
-                this,
-                Global.CAMERA_PERMISSIONS_REQUEST,
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.CAMERA)) {
-            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            Uri photoUri = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", getCameraFile());
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            startActivityForResult(intent, Global.CAMERA_IMAGE_REQUEST);
-        }
+    private void addCameraFAB() {
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                CameraUtil.startCamera(MapsActivity.this);
+            }
+        });
     }
 
-    public File getCameraFile() {
-        File dir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        return new File(dir, Global.FILE_NAME);
+    private void addMapFragment() {
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+    }
+
+    private void addInfoFAB() {
+        FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.fabClose);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CoordinatorLayout cl = (CoordinatorLayout)findViewById(R.id.infoCoordLayout);
+                LinearLayout ll = (LinearLayout)findViewById(R.id.infoLinLayout);
+
+                cl.setVisibility(CoordinatorLayout.INVISIBLE);
+                ll.setVisibility(LinearLayout.INVISIBLE);
+            }
+        });
+    }
+
+    private void updateStatusBar() {
+        TextView tv = (TextView)findViewById(R.id.statusView);
+        tv.setText(currentRV.name);
     }
 
     @Override
@@ -233,7 +215,7 @@ public class MapsActivity extends FragmentActivity implements
         switch (requestCode) {
             case Global.CAMERA_PERMISSIONS_REQUEST:
                 if (PermissionUtils.permissionGranted(requestCode, Global.CAMERA_PERMISSIONS_REQUEST, grantResults)) {
-                    startCamera();
+                    CameraUtil.startCamera(this);
                 }
                 break;
         }
@@ -269,7 +251,7 @@ public class MapsActivity extends FragmentActivity implements
         try {
             boolean success = mMap.setMapStyle(
                     MapStyleOptions.loadRawResourceStyle(
-                            this, R.raw.map_style_aubergine_labels));
+                            this, map_style));
 
             if (!success) {
                 Log.e(TAG, "Style parsing failed.");
@@ -284,14 +266,22 @@ public class MapsActivity extends FragmentActivity implements
 
         mMap.clear();
 
-        RouteView rv = (RouteView)adapter.getGroup(groupPosition);
-        Route route = db.routeDao().findByName(rv.name);
-        currentLandmarks = db.landmarkRouteDao().findLandmarksForRouteId(route.uid);
+        currentRV = (RouteView)adapter.getGroup(groupPosition);
+        currentLandmarks = db.landmarkRouteDao().findLandmarksForRouteId(currentRV.uid);
 
-        TextView tv = (TextView)findViewById(R.id.statusView);
-        tv.setText(rv.name);
+        updateStatusBar();
 
-        downloadDirections(route, groupPosition, true);
+        if(db.routeDao().hasSteps(currentRV.uid) == 0) {
+            downloadDirections(currentGroupPosition);
+        } else {
+            directionsPO = StepsParser.decode(db.routeDao().getSteps(currentRV.uid));
+
+            directionsPO.color(Color.GRAY);
+            directionsPO.width(15);
+
+            mMap.addPolyline(directionsPO);
+        }
+
         List<MarkerOptions> markerOpts = drawMarkers();
         centerRouteOnMap(markerOpts);
     }
@@ -340,24 +330,30 @@ public class MapsActivity extends FragmentActivity implements
         for(int i = 0; i < routes.size(); i++) {
             List<Landmark> landmarks = db.landmarkRouteDao().findLandmarksForRouteId(routes.get(i).uid);
 
-            downloadDirections(routes.get(i), i,false);
+            downloadDirections(i);
         }
     }
 
-    private void updateEVL(int groupPosition) {
+    private void updateEVL(int groupPosition, int distance, int duration) {
         RouteView rv = (RouteView)adapter.getGroup(groupPosition);
 
-        listCategories.get(groupPosition).length = db.routeDao().findByName(rv.name).length;
-        listCategories.get(groupPosition).duration = db.routeDao().findByName(rv.name).duration;
+        listCategories.get(groupPosition).length = distance;
+        listCategories.get(groupPosition).duration = duration;
         listCategories.get(groupPosition).visited = db.landmarkRouteDao().countVisitedLandmarksForRouteId(rv.uid, true);
         listCategories.get(groupPosition).totalLandmarks = db.landmarkRouteDao().countForRouteId(rv.uid);
+
+        db.routeDao().updateDistance(rv.uid, distance);
+        db.routeDao().updateDuration(rv.uid, duration);
+
         elv.deferNotifyDataSetChanged();
     }
 
-    private void downloadDirections(final Route route, final int groupPosition, final boolean draw) {
+    private void downloadDirections(final int groupPosition) {
+        final RouteView rv = (RouteView)adapter.getGroup(groupPosition);
+
         List<Landmark> landmarks;
         if(groupPosition != currentGroupPosition) {
-            landmarks = db.landmarkRouteDao().findLandmarksForRouteId(route.uid);
+            landmarks = db.landmarkRouteDao().findLandmarksForRouteId(rv.uid);
         } else {
             landmarks = currentLandmarks;
         }
@@ -390,17 +386,12 @@ public class MapsActivity extends FragmentActivity implements
                     @Override
                     public void onResponse(JSONObject response) {
                         Log.d(TAG, response.toString());
+                        // parameter disdur better
+//
+                        ParserTask parserTask = new ParserTask(MapsActivity.this);
+                        parserTask.execute(response.toString());
 
-                        Pair<Integer, Integer> disDur = JSONParser.getDistanceDurationFromDirections(response);
-                        db.routeDao().updateDistance(route.uid, (double) disDur.first / 1000);
-                        db.routeDao().updateDuration(route.uid, disDur.second);
-
-                        updateEVL(groupPosition); // parameter disdur better
-
-                        if(draw) {
-                            ParserTask parserTask = new ParserTask(MapsActivity.this);
-                            parserTask.execute(response.toString());
-                        }
+                        updateEVL(groupPosition, parserTask.getTotalDistance(), parserTask.getTotalDuration());
                     }
                 }, new Response.ErrorListener() {
 
@@ -501,5 +492,13 @@ public class MapsActivity extends FragmentActivity implements
     public void updateDirections(PolylineOptions po) {
         directionsPO = po;
         mMap.addPolyline(directionsPO);
+
+        savePolyline(po);
+    }
+
+    private void savePolyline(PolylineOptions po) {
+        if(db.routeDao().hasSteps(currentRV.uid) == 0) {
+            db.routeDao().updateSteps(currentRV.uid, StepsParser.encode(po));
+        }
     }
 }

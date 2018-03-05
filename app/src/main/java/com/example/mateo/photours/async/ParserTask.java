@@ -17,8 +17,24 @@ public class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<Str
 
     private DirectionsListener listener;
 
+    private int totalDistance;
+    private int totalDuration;
+    private List<List<HashMap<String, String>>> routes;
+
     public ParserTask(DirectionsListener listener){
         this.listener = listener;
+    }
+
+    public int getTotalDistance() {
+        return totalDistance;
+    }
+
+    public int getTotalDuration() {
+        return totalDuration;
+    }
+
+    public List<List<HashMap<String, String>>> getRoutes() {
+        return routes;
     }
 
     @Override
@@ -32,7 +48,12 @@ public class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<Str
             DirectionsJSONParser parser = new DirectionsJSONParser();
 
             // Starts parsing data
-            routes = parser.parse(jObject);
+            parser.parse(jObject);
+
+            totalDistance = parser.getTotalDistance();
+            totalDuration = parser.getTotalDuration();
+            routes = parser.getRoutes();
+
         } catch (Exception e) {
             e.printStackTrace();
         }

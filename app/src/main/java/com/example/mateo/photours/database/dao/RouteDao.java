@@ -49,4 +49,7 @@ public interface RouteDao {
 
     @Query("SELECT uid, name, length, duration FROM route")
     List<Route> getAllWithoutSteps();
+
+    @Query("SELECT COUNT(*) FROM route WHERE steps IS NOT NULL AND uid = :uid")
+    int hasSteps(long uid);
 }
