@@ -24,4 +24,11 @@ public class Global extends Application {
     public static final double MAP_ROUTE_FOCUS_TOP_PADDING = 0.2;
 
     public static final int CLOUD_NUMBER_OF_RESULTS = 5;
+
+    public static final String RESPONSE_NOT_RECOGNIZED = "Not recognized";
+
+    public static final int ERROR_NO_ERROR = 0;
+    public static final int ERROR_API_REQUEST = 1;
+    public static final int ERROR_LANDMARK_NOT_RECOGNIZED = 2;
+    public static final int ERROR_TIMEOUT_EXPIRED = 3;
 }

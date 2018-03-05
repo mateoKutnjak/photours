@@ -20,6 +20,7 @@ import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -468,22 +469,41 @@ public class MapsActivity extends FragmentActivity implements
     }
     // what happens if photo has been recognized (listener for recognized photo calls this)
     @Override
-    public void photoRecognized(List<Landmark> results) {
-        for(Landmark currLandmark : currentLandmarks) {
-            for(Landmark result : results) {
-                if(currLandmark.cloudLabel.equals(result.cloudLabel)) {
-                    // if photo has landmark for certain route, set that landmark as visited
-                    setLandmarkVisited(currLandmark);
-                    // create Popup that creates photo and info of recognized photo
-                    createPopup(currLandmark);
-                }
-            }
-        }
+    public void photoRecognized(List<Landmark> results, int errorCode) {
+        String toastText = null;
 
-        refreshListCategories();
-        adapter.refresh(listCategories, childMap);
-        refreshMap();
+        switch (errorCode) {
+            case Global.ERROR_API_REQUEST:
+                toastText = "Connection error. Try again.";
+                break;
+            case Global.ERROR_LANDMARK_NOT_RECOGNIZED:
+                toastText = "Landmark not recognized. Try again";
+                break;
+            case Global.ERROR_TIMEOUT_EXPIRED:
+                toastText = "Timeout expired. Try again.";
+                break;
+            case Global.ERROR_NO_ERROR:
+                for (Landmark currLandmark : currentLandmarks) {
+                    for (Landmark result : results) {
+                        if (currLandmark.cloudLabel.equals(result.cloudLabel)) {
+                            // if photo has landmark for certain route, set that landmark as visited
+                            setLandmarkVisited(currLandmark);
+                            // create Popup that creates photo and info of recognized photo
+                            createPopup(currLandmark);
+
+                            refreshListCategories();
+                            adapter.refresh(listCategories, childMap);
+                            refreshMap();
+
+                            return;
+                        }
+                    }
+                }
+                toastText = results.get(0).cloudLabel + " (not on the map)";
+        }
+        Toast.makeText(this, toastText, Toast.LENGTH_LONG).show();
     }
+
     // create popUp that contains photo and info
     private void createPopup(Landmark currLandmark) {
         CoordinatorLayout cl = (CoordinatorLayout)findViewById(R.id.infoCoordLayout);
