@@ -31,4 +31,8 @@ public class Global extends Application {
     public static final int ERROR_API_REQUEST = 1;
     public static final int ERROR_LANDMARK_NOT_RECOGNIZED = 2;
     public static final int ERROR_TIMEOUT_EXPIRED = 3;
+
+    private static final String DB_NAME ="photoursDB";
+    private static String DB_PATH = "";
+
 }

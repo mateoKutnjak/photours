@@ -48,7 +48,14 @@ public class DatabaseInitializer {
         return db.landmarkRouteADAO.insert(landmarkRoute);
     }
 
+    private static boolean isEmpty(DBAsync db) {
+        return db.routeADAO.count() == 0 &&
+                db.landmarkADAO.count() == 0;
+    }
+
     private static void populateWithInitData(final DBAsync db) {
+        if(!db.isEmpty()) return;
+
         db.landmarkADAO.clear();
         db.routeADAO.clear();
         db.landmarkRouteADAO.clear();
