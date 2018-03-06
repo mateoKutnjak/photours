@@ -45,13 +45,26 @@
                 android:layout_weight="6"
                 android:layout_margin="25dp"/>
 
-            <ToggleButton
-                android:id="@+id/expListHeader"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:layout_marginStart="25dp"
-                android:layout_marginEnd="25dp"/>
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:orientation="horizontal"
+                android:layout_margin="25dp"
+                android:weightSum="5">
+
+                <ToggleButton
+                    android:id="@+id/expListHeader"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="4"/>
+                <ImageButton
+                    android:id="@+id/fab"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:src="@android:drawable/ic_menu_camera"/>
+            </LinearLayout>
 
             <ExpandableListView
                 android:id="@+id/expList"
@@ -60,23 +73,23 @@
                 android:background="@drawable/back"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="3">
+                android:layout_weight="3.5">
             </ExpandableListView>
 
         </LinearLayout>
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="50dp"
-            android:background="@drawable/fab"
-            android:src="@android:drawable/ic_menu_camera"
-            app:backgroundTint="@color/colorSilver"
-            app:layout_anchor="@id/textView"
-            app:layout_anchorGravity="bottom|right"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true"/>
+        <!--<android.support.design.widget.FloatingActionButton-->
+            <!--android:id="@+id/fab"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_margin="50dp"-->
+            <!--android:background="@drawable/fab"-->
+            <!--android:src="@android:drawable/ic_menu_camera"-->
+            <!--app:backgroundTint="@color/colorSilver"-->
+            <!--app:layout_anchor="@id/textView"-->
+            <!--app:layout_anchorGravity="bottom|right"-->
+            <!--android:layout_alignParentBottom="true"-->
+            <!--android:layout_alignParentEnd="true"/>-->
 
     </android.support.design.widget.CoordinatorLayout>
 
