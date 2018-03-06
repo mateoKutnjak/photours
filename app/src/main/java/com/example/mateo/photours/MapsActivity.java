@@ -33,6 +33,7 @@ import com.example.mateo.photours.adapters.ELVAdapter;
 import com.example.mateo.photours.async.DirectionsListener;
 import com.example.mateo.photours.async.ParserTask;
 import com.example.mateo.photours.database.AppDatabase;
+import com.example.mateo.photours.database.DBAsync;
 import com.example.mateo.photours.database.DatabaseInitializer;
 import com.example.mateo.photours.database.entities.Landmark;
 import com.example.mateo.photours.database.entities.Route;
@@ -70,8 +71,6 @@ public class MapsActivity extends FragmentActivity implements
 
     private static final String TAG = "MapsActivity";
 
-    private AppDatabase db;
-
     private GoogleMap mMap;
 
     // List that contains current route
@@ -94,6 +93,8 @@ public class MapsActivity extends FragmentActivity implements
     private Map<RouteView, List<String>> childMap;
     // Object that recognizes picture
     private CloudAPI cloudAPI;
+
+    private DBAsync db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,29 +127,30 @@ public class MapsActivity extends FragmentActivity implements
     }
     // create database object and initialize hardcoded data (landmarks and routes)
     private void initDatabase() {
-        db = AppDatabase.getAppDatabase(getApplicationContext());
-        DatabaseInitializer.populateSync(db);
+        db = DBAsync.getDatabaseInstance(this);
+        DatabaseInitializer.populate(db);
     }
 
     private void initELV() {
         // fetch expendable list view from layout
         elv = (ExpandableListView) findViewById(R.id.expList);
         // fetch all routs except steps (points on map on which we draw route
-        List<Route> routes = db.routeDao().getAllWithoutSteps();
+        List<Route> routes = db.routeADAO.getAll();
         // route of landmark categories
         listCategories = new ArrayList<>();
 
         // create new object (routeView) not to include steps
-        for(int i = 0; i < routes.size(); i++) {
+        for(int i = 0; i < routes.size(); i++
+                ) {
             RouteView rv = new RouteView();
             rv.uid = routes.get(i).uid;
             rv.name = routes.get(i).name;
             rv.length = routes.get(i).length;
             rv.duration = routes.get(i).duration;
             // how much landmarks has been visited
-            rv.visited = db.landmarkRouteDao().countVisitedLandmarksForRouteId(rv.uid, true);
+            rv.visited = db.landmarkRouteADAO.countVisitedLandmarksForRouteId(rv.uid, true);
             // count all landmarks on route
-            rv.totalLandmarks = db.landmarkRouteDao().countForRouteId(rv.uid);
+            rv.totalLandmarks = db.landmarkRouteADAO.countForRouteId(rv.uid);
 
             // add in listCategories routeView
             listCategories.add(rv);
@@ -159,11 +161,11 @@ public class MapsActivity extends FragmentActivity implements
 
     private void fillELV() {
         // fetch all routes from databease
-        List<Route> routes = db.routeDao().getAll();
+        List<Route> routes = db.routeADAO.getAll();
 
         for (int i = 0; i < routes.size(); i++) {
             // fetch the name of the landmark which is contained in such route
-            List<String> landmarkNames = db.landmarkRouteDao().findLandmarkNamesForRouteId(routes.get(i).uid);
+            List<String> landmarkNames = db.landmarkRouteADAO.findLandmarkNamesForRouteId(routes.get(i).uid);
             // populate child map with landmark names, dictionary that has routeView as key and
             // list of strings (landmark names) as values
             childMap.put(listCategories.get(i), landmarkNames);
@@ -186,7 +188,7 @@ public class MapsActivity extends FragmentActivity implements
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
                 // fetch currently select landmark from db
-                Landmark landmark = db.landmarkDao().findByName((String) adapter.getChild(groupPosition, childPosition));
+                Landmark landmark = db.landmarkADAO.findByName((String) adapter.getChild(groupPosition, childPosition));
                 // move camera that centers marker
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(landmark.latitude, landmark.longitude)));
                 // show text for marker
@@ -307,16 +309,19 @@ public class MapsActivity extends FragmentActivity implements
         // get RouteView that contains data for certain group
         currentRV = (RouteView)adapter.getGroup(groupPosition);
         // fetch Landmarks in current route from database
-        currentLandmarks = db.landmarkRouteDao().findLandmarksForRouteId(currentRV.uid);
+        currentLandmarks = db.landmarkRouteADAO.findLandmarksForRouteId(currentRV.uid);
 
         //updateStatusBar();
 
         // check if route hasn't steps in it, download steps and draw else draw steps
-        if(db.routeDao().hasSteps(currentRV.uid) == 0) {
+
+        String steps = db.routeADAO.getSteps(currentRV.uid);
+
+        if(steps == null) {
             downloadDirections(currentGroupPosition);
         } else {
             // polyline that can be drawn on map
-            directionsPO = StepsParser.decode(db.routeDao().getSteps(currentRV.uid));
+            directionsPO = StepsParser.decode(steps);
             // configure polyline options
             directionsPO.color(Color.GRAY);
             directionsPO.width(15);
@@ -374,7 +379,7 @@ public class MapsActivity extends FragmentActivity implements
 
     private void downloadAllDirections() {
         // fetch all routes from database
-        List<Route> routes = db.routeDao().getAll();
+        List<Route> routes = db.routeADAO.getAll();
 
         for(int i = 0; i < routes.size(); i++) {
             downloadDirections(i);
@@ -386,11 +391,11 @@ public class MapsActivity extends FragmentActivity implements
         // refresh group parameters (distance, duration, visited/all)
         listCategories.get(groupPosition).length = distance;
         listCategories.get(groupPosition).duration = duration;
-        listCategories.get(groupPosition).visited = db.landmarkRouteDao().countVisitedLandmarksForRouteId(rv.uid, true);
-        listCategories.get(groupPosition).totalLandmarks = db.landmarkRouteDao().countForRouteId(rv.uid);
+        listCategories.get(groupPosition).visited = db.landmarkRouteADAO.countVisitedLandmarksForRouteId(rv.uid, true);
+        listCategories.get(groupPosition).totalLandmarks = db.landmarkRouteADAO.countForRouteId(rv.uid);
         // update database with distance and duration
-        db.routeDao().updateDistance(rv.uid, distance);
-        db.routeDao().updateDuration(rv.uid, duration);
+        db.routeADAO.updateDistance(rv.uid, distance);
+        db.routeADAO.updateDuration(rv.uid, duration);
         // refresh expendable list
         elv.deferNotifyDataSetChanged();
     }
@@ -400,7 +405,7 @@ public class MapsActivity extends FragmentActivity implements
         // landmarks of current route that has been selected
         List<Landmark> landmarks;
         if(groupPosition != currentGroupPosition) {
-            landmarks = db.landmarkRouteDao().findLandmarksForRouteId(rv.uid);
+            landmarks = db.landmarkRouteADAO.findLandmarksForRouteId(rv.uid);
         } else {
             landmarks = currentLandmarks;
         }
@@ -472,6 +477,8 @@ public class MapsActivity extends FragmentActivity implements
     public void photoRecognized(List<Landmark> results, int errorCode) {
         String toastText = null;
 
+        List<Landmark> allLandmarks = db.landmarkADAO.getAll();
+
         switch (errorCode) {
             case Global.ERROR_API_REQUEST:
                 toastText = "Connection error. Try again.";
@@ -483,13 +490,13 @@ public class MapsActivity extends FragmentActivity implements
                 toastText = "Timeout expired. Try again.";
                 break;
             case Global.ERROR_NO_ERROR:
-                for (Landmark currLandmark : currentLandmarks) {
+                for (Landmark landmark : allLandmarks) {
                     for (Landmark result : results) {
-                        if (currLandmark.cloudLabel.equals(result.cloudLabel)) {
+                        if (landmark.cloudLabel.equals(result.cloudLabel)) {
                             // if photo has landmark for certain route, set that landmark as visited
-                            setLandmarkVisited(currLandmark);
+                            setLandmarkVisited(landmark);
                             // create Popup that creates photo and info of recognized photo
-                            createPopup(currLandmark);
+                            createPopup(landmark);
 
                             refreshListCategories();
                             adapter.refresh(listCategories, childMap);
@@ -524,7 +531,7 @@ public class MapsActivity extends FragmentActivity implements
 
     private void setLandmarkVisited(Landmark currLandmark) {
         // set in database that certain landmark has been visited
-        db.landmarkDao().setVisitedById(currLandmark.uid, true);
+        db.landmarkADAO.setVisitedById(currLandmark.uid, true);
     }
 
     private void refreshMap() {
@@ -533,7 +540,7 @@ public class MapsActivity extends FragmentActivity implements
         // connect RouteView with adapter and group (current group and its route)
         RouteView rv = (RouteView)adapter.getGroup(currentGroupPosition);
         // fetch all landmarks that are located on choosen route
-        currentLandmarks = db.landmarkRouteDao().findLandmarksForRouteId(rv.uid);
+        currentLandmarks = db.landmarkRouteADAO.findLandmarksForRouteId(rv.uid);
         // addPolyline that represents route steps
         mMap.addPolyline(directionsPO);
         // draw markers for landmarks contained on route
@@ -542,7 +549,7 @@ public class MapsActivity extends FragmentActivity implements
 
     private void refreshListCategories() {
         // create list of routes that are fetched from database without steps
-        List<Route> routes = db.routeDao().getAllWithoutSteps();
+        List<Route> routes = db.routeADAO.getAllWithoutSteps();
         // create new list fo groups
         listCategories = new ArrayList<>();
 
@@ -554,8 +561,8 @@ public class MapsActivity extends FragmentActivity implements
             rv.length = routes.get(i).length;
             rv.duration = routes.get(i).duration;
             // count number of visited landmarks
-            rv.visited = db.landmarkRouteDao().countVisitedLandmarksForRouteId(rv.uid, true);
-            rv.totalLandmarks = db.landmarkRouteDao().countForRouteId(rv.uid);
+            rv.visited = db.landmarkRouteADAO.countVisitedLandmarksForRouteId(rv.uid, true);
+            rv.totalLandmarks = db.landmarkRouteADAO.countForRouteId(rv.uid);
             // add routeView element to listCategories
             listCategories.add(rv);
         }
@@ -563,7 +570,7 @@ public class MapsActivity extends FragmentActivity implements
         // for each element in routes (list with routes from db)
         for (int i = 0; i < routes.size(); i++) {
             // create list full of strings that contains landmark names with ids from database
-            List<String> landmarkNames = db.landmarkRouteDao().findLandmarkNamesForRouteId(routes.get(i).uid);
+            List<String> landmarkNames = db.landmarkRouteADAO.findLandmarkNamesForRouteId(routes.get(i).uid);
             // create childMap which contains landmarks from list
             childMap.put(listCategories.get(i), landmarkNames);
         }
@@ -581,9 +588,9 @@ public class MapsActivity extends FragmentActivity implements
     }
     // function that saves given polylines to database
     private void savePolyline(PolylineOptions po) {
-        if(db.routeDao().hasSteps(currentRV.uid) == 0) {
+        if(db.routeADAO.hasSteps(currentRV.uid) == 0) {
             // if there are no steps in current route in db, update database wih steps
-            db.routeDao().updateSteps(currentRV.uid, StepsParser.encode(po));
+            db.routeADAO.updateSteps(currentRV.uid, StepsParser.encode(po));
         }
     }
 }

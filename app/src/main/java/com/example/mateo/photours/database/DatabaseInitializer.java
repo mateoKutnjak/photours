@@ -14,11 +14,11 @@ public class DatabaseInitializer {
         task.execute();
     }
 
-    public static void populateSync(@NonNull final AppDatabase db) {
-        populateWithInitData(db);
-    }
+    //public static void populateSync(@NonNull final AppDatabase db) {
+        //populateWithInitData(db);
+    //}
 
-    private static long addLandmark(final AppDatabase db, final String name, final String cloudLabel, final double latitude, final double longitude, final String message) {
+    private static long addLandmark(final DBAsync db, final String name, final String cloudLabel, final double latitude, final double longitude, final String message) {
         Landmark landmark = new Landmark();
 
         landmark.name = name;
@@ -27,31 +27,31 @@ public class DatabaseInitializer {
         landmark.longitude = longitude;
         landmark.message = message;
 
-        return db.landmarkDao().insert(landmark);
+        return db.landmarkADAO.insert(landmark);
     }
 
-    private static long addRoute(final AppDatabase db, final String name, final double length) {
+    private static long addRoute(final DBAsync db, final String name, final double length) {
         Route route = new Route();
 
         route.name = name;
         route.length = length;
 
-        return db.routeDao().insert(route);
+        return db.routeADAO.insert(route);
     }
 
-    private static long addLandmarkRoute(final AppDatabase db, final long landmarkId, final long routeId) {
+    private static long addLandmarkRoute(final DBAsync db, final long landmarkId, final long routeId) {
         LandmarkRoute landmarkRoute = new LandmarkRoute();
 
         landmarkRoute.landmarkId = landmarkId;
         landmarkRoute.routeId = routeId;
 
-        return db.landmarkRouteDao().insert(landmarkRoute);
+        return db.landmarkRouteADAO.insert(landmarkRoute);
     }
 
-    private static void populateWithInitData(final AppDatabase db) {
-        db.landmarkDao().clear();
-        db.routeDao().clear();
-        db.landmarkRouteDao().clear();
+    private static void populateWithInitData(final DBAsync db) {
+        db.landmarkADAO.clear();
+        db.routeADAO.clear();
+        db.landmarkRouteADAO.clear();
 
         long landmarkId_zagrebCathedral = addLandmark(db, "Zagreb cathedral", "Zagreb Cathedral",45.814548, 15.979477, "1000 years old");
         long landmarkId_croatianNationalTheatre = addLandmark(db, "Croatian national theater", "Croatian National Theatre in Zagreb", 45.809664, 15.969938, "Coming here with hobos");
@@ -74,6 +74,10 @@ public class DatabaseInitializer {
         addLandmarkRoute(db, landmarkId_banJelacicMonument, routeId_crazyLandmarks);
     }
 
+    public static void populate(@NonNull DBAsync dba) {
+        populateWithInitData(dba);
+    }
+
     private static class PopulateDbAsync extends AsyncTask<Void, Void, Void> {
 
         private final AppDatabase mDb;
@@ -84,7 +88,7 @@ public class DatabaseInitializer {
 
         @Override
         protected Void doInBackground(Void... params) {
-            populateWithInitData(mDb);
+            //populateWithInitData(mDb);
             return null;
         }
     }
