@@ -190,10 +190,10 @@ public class MapsActivity extends FragmentActivity implements
         });
     }
 
-    private void updateStatusBar() {
-        TextView tv = (TextView) findViewById(R.id.statusView);
-        tv.setText(currentRV.name);
-    }
+//    private void updateStatusBar() {
+//        TextView tv = (TextView) findViewById(R.id.statusView);
+//        tv.setText(currentRV.name);
+//    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
