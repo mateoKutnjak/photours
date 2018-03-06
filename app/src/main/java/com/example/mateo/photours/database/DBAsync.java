@@ -24,7 +24,7 @@ public class DBAsync {
     public static DBAsync getDatabaseInstance(Context context) {
         if (INSTANCE == null) {
             INSTANCE = new DBAsync(
-                    Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class, "user-database")
+                    Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class, "photoursDB")
                             // allow queries on the main thread.
                             // Don't do this on a real app! See PersistenceBasicSample for an example.
 //                            .allowMainThreadQueries()
@@ -42,6 +42,10 @@ public class DBAsync {
 
     private DBAsync(AppDatabase db) {
         this.db = db;
+    }
+
+    public boolean isEmpty() {
+        return landmarkADAO.count() == 0 && routeADAO.count() == 0;
     }
 
     public class LandmarkAsyncDAO {

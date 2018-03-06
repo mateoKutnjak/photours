@@ -6,7 +6,7 @@ public class Global extends Application {
 
     public static final int ZERO = 0;
     public static final int ONE = 1;
-
+//dddq
     public static final String CLOUD_VISION_API_KEY = "AIzaSyCh-7eNuvSOLM4qFnV5Z3z_UCBM25Mwx0s";
     public static final String SERVER_KEY = "AIzaSyCZypjPER2u8bHI65uv73DHE4B-rUoztpU";
 
@@ -31,4 +31,8 @@ public class Global extends Application {
     public static final int ERROR_API_REQUEST = 1;
     public static final int ERROR_LANDMARK_NOT_RECOGNIZED = 2;
     public static final int ERROR_TIMEOUT_EXPIRED = 3;
+
+    private static final String DB_NAME ="photoursDB";
+    private static String DB_PATH = "";
+
 }
