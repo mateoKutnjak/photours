@@ -6,7 +6,7 @@ public class Global extends Application {
 
     public static final int ZERO = 0;
     public static final int ONE = 1;
-
+//dddq
     public static final String CLOUD_VISION_API_KEY = "AIzaSyCh-7eNuvSOLM4qFnV5Z3z_UCBM25Mwx0s";
     public static final String SERVER_KEY = "AIzaSyCZypjPER2u8bHI65uv73DHE4B-rUoztpU";
 
