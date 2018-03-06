@@ -1,6 +1,7 @@
 package com.example.mateo.photours;
 
 import android.Manifest;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -16,11 +17,14 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -30,6 +34,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.mateo.photours.adapters.ELVAdapter;
+import com.example.mateo.photours.animation.CoordinateAnimation;
+import com.example.mateo.photours.animation.ViewAnimatorSupport;
 import com.example.mateo.photours.async.DirectionsListener;
 import com.example.mateo.photours.async.ParserTask;
 import com.example.mateo.photours.database.AppDatabase;
@@ -56,6 +62,7 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.common.collect.Maps;
 
 import org.json.JSONObject;
 
@@ -95,6 +102,8 @@ public class MapsActivity extends FragmentActivity implements
         initCloudAPI();
         initDatabase();
 
+        initListHeader();
+
         initELV();
         fillELV();
 
@@ -102,6 +111,31 @@ public class MapsActivity extends FragmentActivity implements
         addMapFragment();
 
         addInfoFAB();
+    }
+
+    private void initListHeader() {
+        ToggleButton b = (ToggleButton) findViewById(R.id.expListHeader);
+
+        b.setChecked(true);
+
+        b.setText(Global.LIST_HEADER_TEXT_ROUTES);
+        b.setTextOn(Global.LIST_HEADER_TEXT_HIDE_ROUTES);
+        b.setTextOff(Global.LIST_HEADER_TEXT_SHOW_ROUTES);
+
+        b.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ToggleButton toggleButton = (ToggleButton)v;
+                float[] movement = toggleButton.isChecked() ? new float[] {elv.getHeight(), 0f} : new float[] {0f, elv.getHeight()};
+
+                ViewAnimatorSupport.animate(
+                        MapsActivity.this,
+                        R.id.mainLinLayout,
+                        1000,
+                        CoordinateAnimation.COORDINATE_Y,
+                        movement);
+            }
+        });
     }
 
     private void initCloudAPI() {
@@ -117,6 +151,8 @@ public class MapsActivity extends FragmentActivity implements
         elv = (ExpandableListView) findViewById(R.id.expList);
         List<Route> routes = db.routeADAO.getAll();
         listCategories = new ArrayList<>();
+
+        ViewAnimatorSupport.animate(this, R.id.expList, 1000, CoordinateAnimation.COORDINATE_Y, 1000, 0);
 
         for (int i = 0; i < routes.size(); i++
                 ) {

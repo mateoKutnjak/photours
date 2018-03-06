@@ -35,4 +35,8 @@ public class Global extends Application {
     private static final String DB_NAME ="photoursDB";
     private static String DB_PATH = "";
 
+
+    public static final String LIST_HEADER_TEXT_ROUTES = "Routes";
+    public static final CharSequence LIST_HEADER_TEXT_HIDE_ROUTES = "Hide routes";
+    public static final CharSequence LIST_HEADER_TEXT_SHOW_ROUTES = "Show routes";
 }
