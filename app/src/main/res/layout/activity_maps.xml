@@ -1,5 +1,6 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/gallerylayout"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
@@ -50,15 +51,18 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
                 android:orientation="horizontal"
-                android:layout_margin="25dp"
+                android:layout_marginStart="25dp"
+                android:layout_marginEnd="25dp"
                 android:weightSum="5">
 
                 <ToggleButton
                     android:id="@+id/expListHeader"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="4"/>
+                    android:layout_weight="4"
+                    tools:ignore="NestedWeights" />
                 <ImageButton
+                    android:contentDescription="@string/app_name"
                     android:id="@+id/fab"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
@@ -110,6 +114,7 @@
             android:background="@drawable/popup_background">
 
             <ImageView
+                android:contentDescription="@string/app_name"
                 android:id="@+id/infoImageView"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
