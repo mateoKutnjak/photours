@@ -20,8 +20,8 @@ public class Global extends Application {
     public static final int REQUEST_LOCATION = 1;
     public static final String TRAVEL_MODE_WALKING = "walking";
 
-    public static final double MAP_ROUTE_FOCUS_BOTTOM_PADDING = 0.5;
-    public static final double MAP_ROUTE_FOCUS_TOP_PADDING = 0.2;
+    public static final double MAP_ROUTE_FOCUS_BOTTOM_PADDING = 0.8;
+    public static final double MAP_ROUTE_FOCUS_TOP_PADDING = 0.1;
 
     public static final int CLOUD_NUMBER_OF_RESULTS = 5;
 

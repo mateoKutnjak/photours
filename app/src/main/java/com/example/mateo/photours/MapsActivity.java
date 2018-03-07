@@ -120,7 +120,7 @@ public class MapsActivity extends FragmentActivity implements
 
         b.setChecked(true);
 
-        b.setText(Global.LIST_HEADER_TEXT_ROUTES);
+        b.setText(Global.LIST_HEADER_TEXT_HIDE_ROUTES);
         b.setTextOn(Global.LIST_HEADER_TEXT_HIDE_ROUTES);
         b.setTextOff(Global.LIST_HEADER_TEXT_SHOW_ROUTES);
 
@@ -153,8 +153,6 @@ public class MapsActivity extends FragmentActivity implements
         elv = (ExpandableListView) findViewById(R.id.expList);
         List<Route> routes = db.routeADAO.getAll();
         listCategories = new ArrayList<>();
-
-        ViewAnimatorSupport.animate(this, R.id.expList, 1000, CoordinateAnimation.COORDINATE_Y, 1000, 0);
 
         for (int i = 0; i < routes.size(); i++
                 ) {
@@ -227,11 +225,6 @@ public class MapsActivity extends FragmentActivity implements
             }
         });
     }
-
-//    private void updateStatusBar() {
-//        TextView tv = (TextView) findViewById(R.id.statusView);
-//        tv.setText(currentRV.name);
-//    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
